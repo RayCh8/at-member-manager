@@ -2,6 +2,6 @@
 // source: pkg/pb/rpc.proto
 package pb
 
-type GoAmazingRPC interface {
-	GoAmazingServer
+type AtMemberManagerRPC interface {
+	AtMemberManagerServer
 }

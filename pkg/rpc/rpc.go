@@ -5,9 +5,8 @@ import (
 	"strconv"
 	"unsafe"
 
-	"github.com/AmazingTalker/go-amazing/pkg/dao"
-	"github.com/AmazingTalker/go-amazing/pkg/pb"
-	"github.com/AmazingTalker/go-amazing/pkg/rpc/config"
+	"github.com/AmazingTalker/at-member-manager/pkg/dao"
+	"github.com/AmazingTalker/at-member-manager/pkg/pb"
 	"github.com/AmazingTalker/go-rpc-kit/logkit"
 	"github.com/AmazingTalker/go-rpc-kit/metrickit"
 	"github.com/AmazingTalker/go-rpc-kit/validatorkit"
@@ -19,111 +18,121 @@ var (
 	)
 )
 
-type GoAmazingServerOpt struct {
+type AtMemberManagerServerOpt struct {
 	Validator validatorkit.Validator
-	RecordDao dao.RecordDAO
+	MemberDao dao.MemberDAO
 }
 
-// GoAmazingServer 1. Implement a struct as you like.
-// Generate everything with an interface named "GoAmazingRPC"
-type GoAmazingServer struct {
+// AtMemberManagerServer 1. Implement a struct as you like.
+// Generate everything with an interface named "AtMemberManagerRPC"
+type AtMemberManagerServer struct {
 	validator validatorkit.Validator
-	recordDao dao.RecordDAO
+	memberDao dao.MemberDAO
 }
 
-func NewGoAmazingServer(opt GoAmazingServerOpt) GoAmazingServer {
-	return GoAmazingServer{
+func NewAtMemberManagerServer(opt AtMemberManagerServerOpt) AtMemberManagerServer {
+	return AtMemberManagerServer{
 		validator: opt.Validator,
-		recordDao: opt.RecordDao,
+		memberDao: opt.MemberDao,
 	}
 }
 
 // Health 2. Complete these methods.
-func (serv GoAmazingServer) Health(_ context.Context, _ *pb.HealthReq) (*pb.HealthRes, error) {
+func (serv AtMemberManagerServer) Health(_ context.Context, _ *pb.HealthReq) (*pb.HealthRes, error) {
 	return &pb.HealthRes{Ok: true}, nil
 }
 
-func (serv GoAmazingServer) Config(ctx context.Context, _ *pb.ConfigReq) (*pb.ConfigRes, error) {
-	cfg := config.Config()
-
-	return &pb.ConfigRes{
-		Enable: cfg.Enable,
-		Num:    cfg.Num,
-		Str:    cfg.Str,
-	}, nil
-}
-
-func (serv GoAmazingServer) CreateRecord(ctx context.Context, req *pb.CreateRecordReq) (*pb.CreateRecordRes, error) {
+func (serv AtMemberManagerServer) CreateMember(ctx context.Context, req *pb.CreateMemberReq) (*pb.CreateMemberRes, error) {
 	defer rpcMet.RecordDuration([]string{"time"}, map[string]string{}).End()
 
-	r := &dao.Record{
-		TheNum: req.TheNum,
-		TheStr: req.TheStr,
-	}
-
-	if err := serv.recordDao.CreateRecord(ctx, r); err != nil {
-		logkit.ErrorV2(ctx, "dao.CreateRecord failed", err, nil)
+	if err := serv.validator.Valid(ctx, req); err != nil {
+		logkit.ErrorV2(ctx, "CreateMember validate failed", err, nil)
 		return nil, err
 	}
 
-	resp := pb.CreateRecordRes{Record: r.FormatPb()}
+	m := &dao.Member{
+		Name:     req.Name,
+		Birthday: req.Birthday,
+	}
+
+	if _, err := serv.memberDao.CreateMember(ctx, m); err != nil {
+		logkit.ErrorV2(ctx, "dao.CreateMember failed", err, nil)
+		return nil, err
+	}
+
+	resp := pb.CreateMemberRes{Member: m.FormatPb()}
 	rpcMet.SetGauge([]string{"resp_size"}, float64(unsafe.Sizeof(resp)), map[string]string{})
 
 	return &resp, nil
 }
 
-func (serv GoAmazingServer) GetRecord(ctx context.Context, req *pb.GetRecordReq) (*pb.GetRecordRes, error) {
-	defer rpcMet.RecordDuration([]string{"time"}, map[string]string{}).End()
-
-	ctx = logkit.EnrichPayload(ctx, logkit.Payload{"id": req.ID})
-
-	r, err := serv.recordDao.GetRecord(ctx, req.ID)
-	if err != nil {
-		logkit.ErrorV2(ctx, "dao.GetRecord failed", err, nil)
-		return nil, err
-	}
-
-	resp := pb.GetRecordRes{Record: r.FormatPb()}
-	rpcMet.SetGauge([]string{"resp_size"}, float64(unsafe.Sizeof(resp)), map[string]string{})
-
-	return &resp, err
-}
-
-func (serv GoAmazingServer) ListRecord(ctx context.Context, req *pb.ListRecordReq) (*pb.ListRecordRes, error) {
+func (serv AtMemberManagerServer) UpdateMember(ctx context.Context, req *pb.UpdateMemberReq) (*pb.UpdateMemberRes, error) {
 	defer rpcMet.RecordDuration([]string{"time"}, map[string]string{}).End()
 
 	if err := serv.validator.Valid(ctx, req); err != nil {
+		logkit.ErrorV2(ctx, "UpdateMember validate failed", err, nil)
 		return nil, err
 	}
 
-	size, err := strconv.ParseInt(req.PageSize, 10, 32)
+	ctx = logkit.EnrichPayload(ctx, logkit.Payload{"id": req.ID})
+	id, err := strconv.ParseInt(req.ID, 10, 64)
 	if err != nil {
-		logkit.ErrorV2(ctx, "strconv.ParseInt failed", err, logkit.Payload{"size": req.PageSize})
+		logkit.ErrorV2(ctx, "UpdateMember parse id to int64 failed", err, nil)
 		return nil, err
 	}
-	page, err := strconv.ParseInt(req.Page, 10, 32)
+	m, err := serv.memberDao.UpdateMember(ctx, id, req.Name, req.Birthday)
+
 	if err != nil {
-		logkit.ErrorV2(ctx, "strconv.ParseInt failed", err, logkit.Payload{"page": req.Page})
+		logkit.ErrorV2(ctx, "dao.UpdateMember failed", err, nil)
 		return nil, err
 	}
 
-	// Just demo
-	records, err := serv.recordDao.ListRecords(ctx, dao.ListRecordsOpt{
-		Size: int(size),
-		Page: int(page),
+	resp := pb.UpdateMemberRes{Member: m.FormatPb()}
+	rpcMet.SetGauge([]string{"resp_size"}, float64(unsafe.Sizeof(resp)), map[string]string{})
+
+	return &resp, nil
+}
+
+func (serv AtMemberManagerServer) ListMembers(ctx context.Context, req *pb.ListMembersReq) (*pb.ListMembersRes, error) {
+	defer rpcMet.RecordDuration([]string{"time"}, map[string]string{}).End()
+	defer rpcMet.IncrCount([]string{"Call per day"}, 1, map[string]string{
+		"env":     "dev",
+		"service": "at-member-manager",
 	})
+
+	members, err := serv.memberDao.ListMembers(ctx)
 	if err != nil {
-		logkit.ErrorV2(ctx, "dao.ListRecords failed", err, logkit.Payload{"page": req.Page, "size": req.PageSize})
+		logkit.ErrorV2(ctx, "dao.ListMembers failed", err, nil)
 		return nil, err
 	}
 
-	result := make([]*pb.Record, len(records))
-	for i, r := range records {
-		r := r
-		result[i] = r.FormatPb()
+	result := make([]*pb.Member, len(members))
+	for i, m := range members {
+		m := m
+		result[i] = m.FormatPb()
 	}
 
-	resp := pb.ListRecordRes{Records: result}
+	resp := pb.ListMembersRes{Members: result}
+	rpcMet.SetGauge([]string{"resp_size"}, float64(unsafe.Sizeof(resp)), map[string]string{})
+
+	return &resp, nil
+}
+
+func (serv AtMemberManagerServer) DeleteMember(ctx context.Context, req *pb.DeleteMemberReq) (*pb.DeleteMemberRes, error) {
+	defer rpcMet.RecordDuration([]string{"time"}, map[string]string{}).End()
+
+	id, err := strconv.ParseInt(req.ID, 10, 64)
+	if err != nil {
+		logkit.ErrorV2(ctx, "DeleteMember parse id to int64 failed", err, nil)
+		return nil, err
+	}
+
+	if err := serv.memberDao.DeleteMember(ctx, id); err != nil {
+		logkit.ErrorV2(ctx, "dao.DeleteMember failed", err, nil)
+		return nil, err
+	}
+
+	resp := pb.DeleteMemberRes{}
 	rpcMet.SetGauge([]string{"resp_size"}, float64(unsafe.Sizeof(resp)), map[string]string{})
 
 	return &resp, nil

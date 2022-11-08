@@ -2,19 +2,17 @@ package dao
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"gorm.io/gorm"
 
 	"github.com/AmazingTalker/go-cache"
 	"github.com/AmazingTalker/go-rpc-kit/daokit"
-	"github.com/AmazingTalker/go-rpc-kit/logkit"
 	"github.com/AmazingTalker/go-rpc-kit/metrickit"
 )
 
 const (
-	pfxRecord = "records"
+	pfxRecord = "members"
 )
 
 var (
@@ -24,12 +22,12 @@ var (
 )
 
 type impl struct {
-	mysql MySqlRecordDAO
+	mysql MySqlMemberDAO
 	cache cache.Cache
 }
 
-func NewRecordDAO(db *gorm.DB, cacheSrv cache.Service) RecordDAO {
-	im := &impl{mysql: NewMySqlRecordDAO(db)}
+func NewMemberDAO(db *gorm.DB, cacheSrv cache.Service) MemberDAO {
+	im := &impl{mysql: NewMySqlMemberDAO(db)}
 
 	im.cache = cacheSrv.Create([]cache.Setting{
 		{
@@ -76,41 +74,20 @@ func NewRecordDAO(db *gorm.DB, cacheSrv cache.Service) RecordDAO {
 	return im
 }
 
-func (im *impl) CreateRecord(ctx context.Context, record *Record, enrich ...daokit.Enrich) error {
+func (im *impl) CreateMember(ctx context.Context, member *Member, enrich ...daokit.Enrich) (*Member, error) {
 	defer met.RecordDuration([]string{"time"}, map[string]string{}).End()
 
-	return im.mysql.CreateRecord(ctx, record, enrich...)
+	return im.mysql.CreateMember(ctx, member, enrich...)
 }
 
-func (im *impl) GetRecord(ctx context.Context, id string) (*Record, error) {
-	defer met.RecordDuration([]string{"time"}, map[string]string{}).End()
-
-	record := &Record{}
-	ctx = logkit.EnrichPayload(ctx, logkit.Payload{"usingCachePrefix": pfxRecord})
-
-	if err := im.cache.GetByFunc(ctx, pfxRecord, id, record, func() (interface{}, error) {
-		// TODO: cache GetByFunc should pass the context
-		ctx = logkit.EnrichPayload(ctx, logkit.Payload{"cacheHit": false})
-		return im.mysql.GetRecord(ctx, id)
-	}); err != nil {
-		return nil, err
-	}
-
-	return record, nil
+func (im *impl) UpdateMember(ctx context.Context, id int64, name string, birthday *time.Time) (*Member, error) {
+	return im.mysql.UpdateMember(ctx, id, name, birthday)
 }
 
-func (im *impl) ListRecords(ctx context.Context, opt ListRecordsOpt) ([]Record, error) {
-	defer met.RecordDuration([]string{"time"}, map[string]string{}).End()
+func (im *impl) ListMembers(ctx context.Context) ([]Member, error) {
+	return im.mysql.ListMembers(ctx)
+}
 
-	var records []Record
-
-	key := fmt.Sprintf("%v-%v", opt.Page, opt.Size)
-	if err := im.cache.GetByFunc(ctx, pfxRecord, key, &records, func() (interface{}, error) {
-		// TODO: cache GetByFunc should pass the context
-		return im.mysql.ListRecords(ctx, opt)
-	}); err != nil {
-		return nil, err
-	}
-
-	return records, nil
+func (im *impl) DeleteMember(ctx context.Context, id int64) error {
+	return im.mysql.DeleteMember(ctx, id)
 }

@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/AmazingTalker/go-amazing/pkg/pb";
+option go_package = "github.com/AmazingTalker/at-member-manager/pkg/pb";
 
 package pb;
 
@@ -10,7 +10,7 @@ import "third_party/amazingtalker/atproto.proto";
 
 import "google/protobuf/timestamp.proto";
 
-service GoAmazing {
+service AtMemberManager {
     // Health check api for k8s.
     rpc Health(HealthReq) returns (HealthRes) {
         option (google.api.http) = {
@@ -18,40 +18,41 @@ service GoAmazing {
         };
     }
 
-    rpc Config(ConfigReq) returns (ConfigRes) {
-        option (google.api.http) = {
-            get: "/config"
-        };
-    }
-
-    rpc CreateRecord(CreateRecordReq) returns (CreateRecordRes) {
+    rpc CreateMember(CreateMemberReq) returns (CreateMemberRes) {
     option (google.api.http) = {
-            post: "/api/record"
-            body: "record"
+            post: "/api/members"
+            body: "member"
+        }; 
+    }
+
+    rpc UpdateMember(UpdateMemberReq) returns (UpdateMemberRes) {
+        option (google.api.http) = {
+            put: "/api/members/:id"
+            body: "member"
         };
     }
 
-    rpc GetRecord(GetRecordReq) returns (GetRecordRes) {
+    rpc ListMembers(ListMembersReq) returns (ListMembersRes) {
         option (google.api.http) = {
-            get: "/api/records/:id"
-            body: "record"
+            get: "/api/members"
+            body: "member"
         };
     }
 
-    rpc ListRecord(ListRecordReq) returns (ListRecordRes) {
+    rpc DeleteMember(DeleteMemberReq) returns (DeleteMemberRes) {
         option (google.api.http) = {
-            get: "/api/records"
-            body: "records"
+            delete: "/api/members/:id"
+            body: "member"
         };
     }
 }
 
-message Record {
-    string id = 1 [(gogoproto.customname) = "ID"];
-    int64 the_num = 2 [(gogoproto.customname) = "TheNum", (gogoproto.jsontag) = "theNum"];
-    string the_str = 3 [(gogoproto.customname) = "TheStr", (gogoproto.jsontag) = "theStr"];
-    google.protobuf.Timestamp created_at = 4 [(gogoproto.stdtime) = true, (gogoproto.customname) = "CreatedAt", (gogoproto.wktpointer) = true, (gogoproto.jsontag) = "createdAt"];
-    google.protobuf.Timestamp updated_at = 5 [(gogoproto.stdtime) = true, (gogoproto.customname) = "UpdatedAt", (gogoproto.wktpointer) = true, (gogoproto.jsontag) = "updatedAt"];
+message Member {
+    int64 id = 1 [(gogoproto.customname) = "ID"];
+    string name = 2 [(gogoproto.customname) = "Name", json_name = "name", (gogoproto.jsontag) = "name"];
+    google.protobuf.Timestamp birthday = 3 [(gogoproto.stdtime) = true, (gogoproto.customname) = "Birthday", (gogoproto.wktpointer) = true, json_name = "birthday", (gogoproto.jsontag) = "birthday"];
+    google.protobuf.Timestamp created_at = 4 [(gogoproto.stdtime) = true, (gogoproto.customname) = "CreatedAt", (gogoproto.wktpointer) = true, json_name = "created_at", (gogoproto.jsontag) = "created_at"];
+    google.protobuf.Timestamp updated_at = 5 [(gogoproto.stdtime) = true, (gogoproto.customname) = "UpdatedAt", (gogoproto.wktpointer) = true, json_name = "updated_at", (gogoproto.jsontag) = "updated_at"];
 }
 
 message HealthReq { }
@@ -60,41 +61,38 @@ message HealthRes {
     bool ok = 1;
 }
 
-message ConfigReq { }
-
-message ConfigRes {
-    bool enable = 1;
-    int64 num = 2;
-    string str = 3;
+message CreateMemberReq { 
+    string name = 1 [(gogoproto.customname) = "Name", json_name = "name", (gogoproto.jsontag) = "name", (gogoproto.moretags)='validate:"required"'];
+    google.protobuf.Timestamp birthday = 2 [(gogoproto.stdtime) = true, (gogoproto.customname) = "Birthday", (gogoproto.wktpointer) = true, json_name = "birthday", (gogoproto.jsontag) = "birthday", (gogoproto.moretags)='validate:"required"'];
 }
 
-message CreateRecordReq {
-    int64 the_num = 1 [(gogoproto.customname) = "TheNum", (gogoproto.jsontag) = "theNum"];
-    string the_str = 2 [(gogoproto.customname) = "TheStr", (gogoproto.jsontag) = "theStr"];
-    google.protobuf.Timestamp created_at = 3 [(gogoproto.stdtime) = true, (gogoproto.customname) = "CreatedAt", (gogoproto.wktpointer) = true, (gogoproto.jsontag) = "createdAt"];
-}
-
-message CreateRecordRes {
+message CreateMemberRes {
     option (atproto.success_http_status) = "201";
-    Record record = 1  [(gogoproto.customname) = "Record"];
+    Member member = 1[(gogoproto.customname) = "Member"];
 }
 
-message GetRecordReq {
-    string id = 1 [(gogoproto.customname) = "ID", (gogoproto.jsontag) = "id", (atproto.frparams) = "true"];
+message UpdateMemberReq { 
+    string id = 1 [(gogoproto.customname) = "ID", json_name = "id", (gogoproto.jsontag) = "id", (atproto.frparams) = "true"];
+    string name = 2 [(gogoproto.customname) = "Name", json_name = "name", (gogoproto.jsontag) = "name", (gogoproto.moretags)='validate:"required"'];
+    google.protobuf.Timestamp birthday = 3 [(gogoproto.stdtime) = true, (gogoproto.customname) = "Birthday", (gogoproto.wktpointer) = true, json_name = "birthday", (gogoproto.jsontag) = "birthday", (gogoproto.moretags)='validate:"required"'];
 }
 
-message GetRecordRes {
+message UpdateMemberRes {
     option (atproto.success_http_status) = "200";
-    Record record = 1  [(gogoproto.customname) = "Record"];
+    Member member = 1 [(gogoproto.customname) = "Member"];
 }
 
-message ListRecordReq {
-    // keys from url queryString or url params is always type of string.
-    string size = 1 [(gogoproto.customname) = "PageSize", (gogoproto.jsontag) = "size", (atproto.frquery) = "true", (gogoproto.moretags)='validate:"required"'];
-    string page = 2 [(gogoproto.customname) = "Page", (gogoproto.jsontag) = "page", (atproto.frquery) = "true", (gogoproto.moretags)='validate:"required"'];
-}
+message ListMembersReq { }
 
-message ListRecordRes {
+message ListMembersRes {
     option (atproto.success_http_status) = "200";
-    repeated Record records = 1  [(gogoproto.customname) = "Records"];
+    repeated Member members = 1 [(gogoproto.customname) = "Members"];
+}
+
+message DeleteMemberReq { 
+    string id = 1 [(gogoproto.customname) = "ID", json_name = "id", (gogoproto.jsontag) = "id", (atproto.frparams) = "true"];
+}
+
+message DeleteMemberRes {
+    option (atproto.success_http_status) = "204";
 }

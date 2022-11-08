@@ -3,17 +3,16 @@ package rpc
 import (
 	"context"
 	"errors"
-	"strconv"
 	"testing"
+	"time"
 
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 
 	codes "github.com/AmazingTalker/at-error-code"
-	mockDAO "github.com/AmazingTalker/go-amazing/internal/pkg/dao"
-	"github.com/AmazingTalker/go-amazing/pkg/dao"
-	"github.com/AmazingTalker/go-amazing/pkg/pb"
+	mockDAO "github.com/AmazingTalker/at-member-manager/internal/pkg/dao"
+	"github.com/AmazingTalker/at-member-manager/pkg/dao"
+	"github.com/AmazingTalker/at-member-manager/pkg/pb"
 	"github.com/AmazingTalker/go-rpc-kit/errorkit"
 	"github.com/AmazingTalker/go-rpc-kit/logkit"
 	"github.com/AmazingTalker/go-rpc-kit/validatorkit"
@@ -21,10 +20,11 @@ import (
 
 var (
 	mockCTX    = context.Background()
-	mockUUID   = uuid.New()
-	mockRecord = &dao.Record{
-		TheNum: 3838,
-		TheStr: "AT",
+	mockID     = "0"
+	mockDate   = time.Now().AddDate(-18, -3, -3)
+	mockMember = &dao.Member{
+		Name:     "Ray",
+		Birthday: &mockDate,
 	}
 )
 
@@ -37,9 +37,9 @@ type rpcSuite struct {
 	suite.Suite
 
 	// mocks
-	mockRecord *mockDAO.RecordDAO
+	mockMember *mockDAO.MemberDAO
 
-	serv GoAmazingServer
+	serv AtMemberManagerServer
 }
 
 func (s *rpcSuite) SetupSuite() {
@@ -56,16 +56,16 @@ func (s *rpcSuite) TearDownSuite() {
 
 func (s *rpcSuite) SetupTest() {
 	// setup mock
-	s.mockRecord = mockDAO.NewRecordDAO(s.T())
+	s.mockMember = mockDAO.NewMemberDAO(s.T())
 
-	s.serv = NewGoAmazingServer(GoAmazingServerOpt{
+	s.serv = NewAtMemberManagerServer(AtMemberManagerServerOpt{
 		Validator: validatorkit.NewGoPlaygroundValidator(),
-		RecordDao: s.mockRecord,
+		MemberDao: s.mockMember,
 	})
 }
 
 func (s *rpcSuite) TearDownTest() {
-	s.mockRecord.AssertExpectations(s.T())
+	s.mockMember.AssertExpectations(s.T())
 }
 
 func TestRPCSuite(t *testing.T) {
@@ -103,46 +103,215 @@ func (s *rpcSuite) TestHealth() {
 	}
 }
 
-func (s *rpcSuite) TestCreateRecord() {
+func (s *rpcSuite) TestCreateMember() {
 	tests := []struct {
 		Desc      string
 		SetupTest func(string)
-		Req       *pb.CreateRecordReq
+		Req       *pb.CreateMemberReq
 		ExpError  error
-		ExpResp   *pb.CreateRecordRes
+		ExpResp   *pb.CreateMemberRes
 	}{
 		{
 			Desc: "create failed",
 			SetupTest: func(desc string) {
-				s.mockRecord.On(
-					"CreateRecord", mock.Anything, mockRecord,
+				s.mockMember.On(
+					"CreateMember", mock.Anything, mockMember,
+				).Return(
+					nil, errors.New("XD"),
+				).Once()
+			},
+			Req: &pb.CreateMemberReq{
+				Name:     mockMember.Name,
+				Birthday: mockMember.Birthday,
+			},
+			ExpError: errors.New("XD"),
+		},
+		{
+			Desc: "normal case",
+			SetupTest: func(desc string) {
+				s.mockMember.On(
+					"CreateMember", mock.Anything, mockMember,
+				).Return(
+					mockMember, nil,
+				).Once()
+			},
+			Req: &pb.CreateMemberReq{
+				Name:     mockMember.Name,
+				Birthday: mockMember.Birthday,
+			},
+			ExpError: nil,
+			ExpResp: &pb.CreateMemberRes{
+				Member: mockMember.FormatPb(),
+			},
+		},
+	}
+
+	for _, t := range tests {
+		if t.SetupTest != nil {
+			t.SetupTest(t.Desc)
+		}
+
+		resp, err := s.serv.CreateMember(mockCTX, t.Req)
+		s.Require().Equal(t.ExpError, err, t.Desc)
+
+		if err == nil {
+			s.Require().Equal(t.ExpResp, resp, t.Desc)
+		}
+
+		s.TearDownTest()
+	}
+}
+
+func (s *rpcSuite) TestUpdateMember() {
+	tests := []struct {
+		Desc      string
+		SetupTest func(string)
+		Req       *pb.UpdateMemberReq
+		ExpError  error
+		ExpResp   *pb.UpdateMemberRes
+	}{
+		{
+			Desc: "update failed",
+			SetupTest: func(desc string) {
+				s.mockMember.On(
+					"UpdateMember", mock.Anything, mockMember,
+				).Return(
+					nil, errors.New("XD"),
+				).Once()
+			},
+			Req: &pb.UpdateMemberReq{
+				ID:       mockID,
+				Name:     mockMember.Name,
+				Birthday: mockMember.Birthday,
+			},
+			ExpError: errors.New("XD"),
+		},
+		{
+			Desc: "normal case",
+			SetupTest: func(desc string) {
+				s.mockMember.On(
+					"UpdateMember", mock.Anything, mockMember,
+				).Return(
+					mockMember, nil,
+				).Once()
+			},
+			Req: &pb.UpdateMemberReq{
+				ID:       mockID,
+				Name:     mockMember.Name,
+				Birthday: mockMember.Birthday,
+			},
+			ExpError: nil,
+			ExpResp: &pb.UpdateMemberRes{
+				Member: mockMember.FormatPb(),
+			},
+		},
+	}
+
+	for _, t := range tests {
+		if t.SetupTest != nil {
+			t.SetupTest(t.Desc)
+		}
+
+		resp, err := s.serv.UpdateMember(mockCTX, t.Req)
+		s.Require().Equal(t.ExpError, err, t.Desc)
+
+		if err == nil {
+			s.Require().Equal(t.ExpResp, resp, t.Desc)
+		}
+
+		s.TearDownTest()
+	}
+}
+
+func (s *rpcSuite) TestListMember() {
+	tests := []struct {
+		Desc      string
+		SetupTest func(string)
+		Req       *pb.ListMembersReq
+		ExpError  error
+		ExpResp   *pb.ListMembersRes
+	}{
+		{
+			Desc: "update failed",
+			SetupTest: func(desc string) {
+				s.mockMember.On(
+					"ListMembers", mock.Anything, mockMember,
+				).Return(
+					nil, errors.New("XD"),
+				).Once()
+			},
+			Req:      &pb.ListMembersReq{},
+			ExpError: errors.New("XD"),
+		},
+		{
+			Desc: "normal case",
+			SetupTest: func(desc string) {
+				s.mockMember.On(
+					"ListMembers", mock.Anything, mockMember,
+				).Return(
+					[]dao.Member{*mockMember}, nil,
+				).Once()
+			},
+			Req:      &pb.ListMembersReq{},
+			ExpError: nil,
+			ExpResp: &pb.ListMembersRes{
+				Members: []*pb.Member{mockMember.FormatPb()},
+			},
+		},
+	}
+
+	for _, t := range tests {
+		if t.SetupTest != nil {
+			t.SetupTest(t.Desc)
+		}
+
+		resp, err := s.serv.ListMembers(mockCTX, t.Req)
+		s.Require().Equal(t.ExpError, err, t.Desc)
+
+		if err == nil {
+			s.Require().Equal(t.ExpResp, resp, t.Desc)
+		}
+
+		s.TearDownTest()
+	}
+}
+
+func (s *rpcSuite) TestDeleteMember() {
+	tests := []struct {
+		Desc      string
+		SetupTest func(string)
+		Req       *pb.DeleteMemberReq
+		ExpError  error
+		ExpResp   *pb.DeleteMemberRes
+	}{
+		{
+			Desc: "delete failed",
+			SetupTest: func(desc string) {
+				s.mockMember.On(
+					"DeleteMember", mock.Anything, mockMember,
 				).Return(
 					errors.New("XD"),
 				).Once()
 			},
-			Req: &pb.CreateRecordReq{
-				TheNum: mockRecord.TheNum,
-				TheStr: mockRecord.TheStr,
+			Req: &pb.DeleteMemberReq{
+				ID: mockID,
 			},
 			ExpError: errors.New("XD"),
 		},
 		{
 			Desc: "normal case",
 			SetupTest: func(desc string) {
-				s.mockRecord.On(
-					"CreateRecord", mock.Anything, mockRecord,
+				s.mockMember.On(
+					"DeleteMember", mock.Anything, mockMember,
 				).Return(
-					nil,
+					mockMember, nil,
 				).Once()
 			},
-			Req: &pb.CreateRecordReq{
-				TheNum: mockRecord.TheNum,
-				TheStr: mockRecord.TheStr,
+			Req: &pb.DeleteMemberReq{
+				ID: mockID,
 			},
 			ExpError: nil,
-			ExpResp: &pb.CreateRecordRes{
-				Record: mockRecord.FormatPb(),
-			},
+			ExpResp:  &pb.DeleteMemberRes{},
 		},
 	}
 
@@ -151,143 +320,7 @@ func (s *rpcSuite) TestCreateRecord() {
 			t.SetupTest(t.Desc)
 		}
 
-		resp, err := s.serv.CreateRecord(mockCTX, t.Req)
-		s.Require().Equal(t.ExpError, err, t.Desc)
-
-		if err == nil {
-			s.Require().Equal(t.ExpResp, resp, t.Desc)
-		}
-
-		s.TearDownTest()
-	}
-}
-
-func (s *rpcSuite) TestGetRecord() {
-	tests := []struct {
-		Desc      string
-		SetupTest func(string)
-		Req       *pb.GetRecordReq
-		ExpError  error
-		ExpResp   *pb.GetRecordRes
-	}{
-		{
-			Desc: "get failed",
-			SetupTest: func(desc string) {
-				s.mockRecord.On(
-					"GetRecord", mock.Anything, mockUUID.String(),
-				).Return(
-					nil, errors.New("XD"),
-				).Once()
-			},
-			Req:      &pb.GetRecordReq{ID: mockUUID.String()},
-			ExpError: errors.New("XD"),
-		},
-		{
-			Desc: "normal case",
-			SetupTest: func(desc string) {
-				s.mockRecord.On(
-					"GetRecord", mock.Anything, mockUUID.String(),
-				).Return(
-					mockRecord, nil,
-				).Once()
-			},
-			Req:      &pb.GetRecordReq{ID: mockUUID.String()},
-			ExpError: nil,
-			ExpResp: &pb.GetRecordRes{
-				Record: mockRecord.FormatPb(),
-			},
-		},
-	}
-
-	for _, t := range tests {
-		if t.SetupTest != nil {
-			t.SetupTest(t.Desc)
-		}
-
-		resp, err := s.serv.GetRecord(mockCTX, t.Req)
-		s.Require().Equal(t.ExpError, err, t.Desc)
-
-		if err == nil {
-			s.Require().Equal(t.ExpResp, resp, t.Desc)
-		}
-
-		s.TearDownTest()
-	}
-}
-
-func (s *rpcSuite) TestListRecord() {
-	tests := []struct {
-		Desc      string
-		SetupTest func(string)
-		Req       *pb.ListRecordReq
-		ExpError  error
-		ExpResp   *pb.ListRecordRes
-	}{
-		{
-			Desc: "parse size failed",
-			Req: &pb.ListRecordReq{
-				PageSize: "abc",
-				Page:     "1",
-			},
-			ExpError: &strconv.NumError{
-				Func: "ParseInt",
-				Num:  "abc",
-				Err:  errors.New("invalid syntax"),
-			},
-		},
-		{
-			Desc: "parse size failed",
-			Req: &pb.ListRecordReq{
-				PageSize: "1",
-				Page:     "abc",
-			},
-			ExpError: &strconv.NumError{
-				Func: "ParseInt",
-				Num:  "abc",
-				Err:  errors.New("invalid syntax"),
-			},
-		},
-		{
-			Desc: "list failed",
-			Req: &pb.ListRecordReq{
-				PageSize: "10",
-				Page:     "1",
-			},
-			SetupTest: func(desc string) {
-				s.mockRecord.On(
-					"ListRecords", mock.Anything, dao.ListRecordsOpt{Size: 10, Page: 1},
-				).Return(
-					nil, errors.New("XD"),
-				).Once()
-			},
-			ExpError: errors.New("XD"),
-		},
-		{
-			Desc: "normal case",
-			Req: &pb.ListRecordReq{
-				PageSize: "10",
-				Page:     "1",
-			},
-			SetupTest: func(desc string) {
-				s.mockRecord.On(
-					"ListRecords", mock.Anything, dao.ListRecordsOpt{Size: 10, Page: 1},
-				).Return(
-					[]dao.Record{*mockRecord}, nil,
-				).Once()
-			},
-			ExpError: nil,
-			ExpResp: &pb.ListRecordRes{
-				Records: []*pb.Record{mockRecord.FormatPb()},
-			},
-		},
-	}
-
-	for _, t := range tests {
-		if t.SetupTest != nil {
-			t.SetupTest(t.Desc)
-		}
-
-		resp, err := s.serv.ListRecord(mockCTX, t.Req)
+		resp, err := s.serv.DeleteMember(mockCTX, t.Req)
 		s.Require().Equal(t.ExpError, err, t.Desc)
 
 		if err == nil {

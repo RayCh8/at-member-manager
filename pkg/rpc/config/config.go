@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	dynamicCfgPath = "go-amazing/rpc/dynamic_config.json"
+	dynamicCfgPath = "at-member-manager/rpc/dynamic_config.json"
 )
 
 var (

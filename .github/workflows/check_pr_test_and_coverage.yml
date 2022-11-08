@@ -10,7 +10,7 @@ jobs:
     env:
       AT_SSH_PRIVATE_KEY_PATH: ".ssh/id_rsa"
     steps:
-      - name: Checkout go-amazing repository
+      - name: Checkout at-member-manager repository
         uses: actions/checkout@v2
 
       - name: Checkout ci tools repository
