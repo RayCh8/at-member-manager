@@ -14,6 +14,7 @@ require (
 	github.com/go-redis/redis/v8 v8.11.4
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/gogo/protobuf v1.3.2
+	github.com/golang/mock v1.6.0 // indirect
 	github.com/golang/snappy v0.0.3 // indirect
 	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/graphql-go/graphql v0.8.0
@@ -23,6 +24,7 @@ require (
 	github.com/rafaelhl/gorm-newrelic-telemetry-plugin v1.0.0
 	github.com/stretchr/testify v1.7.2
 	github.com/ugorji/go v1.2.6 // indirect
+	github.com/vektra/mockery/v2 v2.14.1 // indirect
 	go.etcd.io/etcd/client/v3 v3.5.4 // indirect
 	go.uber.org/atomic v1.8.0 // indirect
 	go.uber.org/multierr v1.7.0 // indirect

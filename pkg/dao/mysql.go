@@ -2,7 +2,7 @@ package dao
 
 import (
 	"context"
-	"time"
+	"errors"
 
 	"gorm.io/gorm"
 
@@ -31,12 +31,15 @@ func (dao MySqlMemberDAO) CreateMember(ctx context.Context, member *Member, enri
 	return member, nil
 }
 
-func (dao MySqlMemberDAO) UpdateMember(ctx context.Context, id int64, name string, birthday *time.Time) (*Member, error) {
+func (dao MySqlMemberDAO) UpdateMember(ctx context.Context, id int64, m *Member) (*Member, error) {
 	defer met.RecordDuration([]string{"mysql", "time"}, map[string]string{}).End()
 
+	if m == nil {
+		return nil, errors.New("member pointer is nil.")
+	}
 	member := &Member{}
 
-	err := dao.db.First(member, "id = ?", id).Updates(Member{Name: name, Birthday: birthday}).Error
+	err := dao.db.First(member, "id = ?", id).Updates(Member{Name: m.Name, Birthday: m.Birthday}).Error
 
 	if err != nil {
 		logkit.Debug(ctx, "update member failed", logkit.Payload{"id": id, "err": err})

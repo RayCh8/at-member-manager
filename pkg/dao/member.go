@@ -10,7 +10,7 @@ import (
 
 type MemberDAO interface {
 	CreateMember(context.Context, *Member, ...daokit.Enrich) (*Member, error)
-	UpdateMember(context.Context, int64, string, *time.Time) (*Member, error)
+	UpdateMember(context.Context, int64, *Member) (*Member, error)
 	ListMembers(context.Context) ([]Member, error)
 	DeleteMember(context.Context, int64) error
 }

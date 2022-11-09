@@ -19,12 +19,23 @@ import (
 )
 
 var (
-	mockCTX    = context.Background()
-	mockID     = "0"
-	mockDate   = time.Now().AddDate(-18, -3, -3)
-	mockMember = &dao.Member{
-		Name:     "Ray",
-		Birthday: &mockDate,
+	mockCTX      = context.Background()
+	mockID       = "0"
+	mockDate     = time.Now().AddDate(-18, -3, -3)
+	mockBirthday = time.Now().AddDate(-20, -5, -5)
+	mockMember   = &dao.Member{
+		ID:        int64(0),
+		Name:      "Ray",
+		Birthday:  &mockDate,
+		CreatedAt: nil,
+		UpdatedAt: nil,
+	}
+	mockMember2 = &dao.Member{
+		ID:        int64(0),
+		Name:      "AT",
+		Birthday:  &mockBirthday,
+		CreatedAt: nil,
+		UpdatedAt: nil,
 	}
 )
 
@@ -174,15 +185,15 @@ func (s *rpcSuite) TestUpdateMember() {
 			Desc: "update failed",
 			SetupTest: func(desc string) {
 				s.mockMember.On(
-					"UpdateMember", mock.Anything, mockMember,
+					"UpdateMember", mock.Anything, int64(0), &dao.Member{Name: mockMember2.Name, Birthday: mockMember2.Birthday},
 				).Return(
 					nil, errors.New("XD"),
 				).Once()
 			},
 			Req: &pb.UpdateMemberReq{
 				ID:       mockID,
-				Name:     mockMember.Name,
-				Birthday: mockMember.Birthday,
+				Name:     mockMember2.Name,
+				Birthday: mockMember2.Birthday,
 			},
 			ExpError: errors.New("XD"),
 		},
@@ -190,19 +201,19 @@ func (s *rpcSuite) TestUpdateMember() {
 			Desc: "normal case",
 			SetupTest: func(desc string) {
 				s.mockMember.On(
-					"UpdateMember", mock.Anything, mockMember,
+					"UpdateMember", mock.Anything, int64(0), &dao.Member{Name: mockMember2.Name, Birthday: mockMember2.Birthday},
 				).Return(
-					mockMember, nil,
+					mockMember2, nil,
 				).Once()
 			},
 			Req: &pb.UpdateMemberReq{
 				ID:       mockID,
-				Name:     mockMember.Name,
-				Birthday: mockMember.Birthday,
+				Name:     mockMember2.Name,
+				Birthday: mockMember2.Birthday,
 			},
 			ExpError: nil,
 			ExpResp: &pb.UpdateMemberRes{
-				Member: mockMember.FormatPb(),
+				Member: mockMember2.FormatPb(),
 			},
 		},
 	}
@@ -232,10 +243,10 @@ func (s *rpcSuite) TestListMember() {
 		ExpResp   *pb.ListMembersRes
 	}{
 		{
-			Desc: "update failed",
+			Desc: "listmember failed",
 			SetupTest: func(desc string) {
 				s.mockMember.On(
-					"ListMembers", mock.Anything, mockMember,
+					"ListMembers", mock.Anything,
 				).Return(
 					nil, errors.New("XD"),
 				).Once()
@@ -247,7 +258,7 @@ func (s *rpcSuite) TestListMember() {
 			Desc: "normal case",
 			SetupTest: func(desc string) {
 				s.mockMember.On(
-					"ListMembers", mock.Anything, mockMember,
+					"ListMembers", mock.Anything,
 				).Return(
 					[]dao.Member{*mockMember}, nil,
 				).Once()
@@ -288,7 +299,7 @@ func (s *rpcSuite) TestDeleteMember() {
 			Desc: "delete failed",
 			SetupTest: func(desc string) {
 				s.mockMember.On(
-					"DeleteMember", mock.Anything, mockMember,
+					"DeleteMember", mock.Anything, int64(0),
 				).Return(
 					errors.New("XD"),
 				).Once()
@@ -302,9 +313,9 @@ func (s *rpcSuite) TestDeleteMember() {
 			Desc: "normal case",
 			SetupTest: func(desc string) {
 				s.mockMember.On(
-					"DeleteMember", mock.Anything, mockMember,
+					"DeleteMember", mock.Anything, int64(0),
 				).Return(
-					mockMember, nil,
+					nil,
 				).Once()
 			},
 			Req: &pb.DeleteMemberReq{

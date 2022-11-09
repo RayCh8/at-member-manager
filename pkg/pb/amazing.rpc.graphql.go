@@ -35,6 +35,32 @@ func RefiningAtMemberManagerGrpcClientFromContext(ctx context.Context) (*AtMembe
 	return client, nil
 }
 
+var MemberObject = graphql.NewObject(graphql.ObjectConfig{
+	Name: "MemberObject",
+	Fields: graphql.Fields{
+		"id":         &graphql.Field{Type: graphql.Int},
+		"name":       &graphql.Field{Type: graphql.String},
+		"birthday":   &graphql.Field{Type: graphql.String},
+		"created_at": &graphql.Field{Type: graphql.String},
+		"updated_at": &graphql.Field{Type: graphql.String},
+	},
+	Description: "",
+})
+
+var HealthReqObject = graphql.NewObject(graphql.ObjectConfig{
+	Name:        "HealthReqObject",
+	Fields:      graphql.Fields{},
+	Description: "",
+})
+
+var CreateMemberResObject = graphql.NewObject(graphql.ObjectConfig{
+	Name: "CreateMemberResObject",
+	Fields: graphql.Fields{
+		"member": &graphql.Field{Type: MemberObject},
+	},
+	Description: "",
+})
+
 var ListMembersReqObject = graphql.NewObject(graphql.ObjectConfig{
 	Name:        "ListMembersReqObject",
 	Fields:      graphql.Fields{},
@@ -95,32 +121,6 @@ var UpdateMemberResObject = graphql.NewObject(graphql.ObjectConfig{
 var DeleteMemberResObject = graphql.NewObject(graphql.ObjectConfig{
 	Name:        "DeleteMemberResObject",
 	Fields:      graphql.Fields{},
-	Description: "",
-})
-
-var MemberObject = graphql.NewObject(graphql.ObjectConfig{
-	Name: "MemberObject",
-	Fields: graphql.Fields{
-		"id":         &graphql.Field{Type: graphql.Int},
-		"name":       &graphql.Field{Type: graphql.String},
-		"birthday":   &graphql.Field{Type: graphql.String},
-		"created_at": &graphql.Field{Type: graphql.String},
-		"updated_at": &graphql.Field{Type: graphql.String},
-	},
-	Description: "",
-})
-
-var HealthReqObject = graphql.NewObject(graphql.ObjectConfig{
-	Name:        "HealthReqObject",
-	Fields:      graphql.Fields{},
-	Description: "",
-})
-
-var CreateMemberResObject = graphql.NewObject(graphql.ObjectConfig{
-	Name: "CreateMemberResObject",
-	Fields: graphql.Fields{
-		"member": &graphql.Field{Type: MemberObject},
-	},
 	Description: "",
 })
 

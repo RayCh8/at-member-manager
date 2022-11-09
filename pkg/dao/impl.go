@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	pfxRecord = "members"
+	pfxMember = "members"
 )
 
 var (
@@ -31,7 +31,7 @@ func NewMemberDAO(db *gorm.DB, cacheSrv cache.Service) MemberDAO {
 
 	im.cache = cacheSrv.Create([]cache.Setting{
 		{
-			Prefix: pfxRecord,
+			Prefix: pfxMember,
 			CacheAttributes: map[cache.Type]cache.Attribute{
 				cache.SharedCacheType: {TTL: time.Minute},
 				cache.LocalCacheType:  {TTL: 10 * time.Second},
@@ -80,14 +80,20 @@ func (im *impl) CreateMember(ctx context.Context, member *Member, enrich ...daok
 	return im.mysql.CreateMember(ctx, member, enrich...)
 }
 
-func (im *impl) UpdateMember(ctx context.Context, id int64, name string, birthday *time.Time) (*Member, error) {
-	return im.mysql.UpdateMember(ctx, id, name, birthday)
+func (im *impl) UpdateMember(ctx context.Context, id int64, member *Member) (*Member, error) {
+	defer met.RecordDuration([]string{"time"}, map[string]string{}).End()
+
+	return im.mysql.UpdateMember(ctx, id, member)
 }
 
 func (im *impl) ListMembers(ctx context.Context) ([]Member, error) {
+	defer met.RecordDuration([]string{"time"}, map[string]string{}).End()
+
 	return im.mysql.ListMembers(ctx)
 }
 
 func (im *impl) DeleteMember(ctx context.Context, id int64) error {
+	defer met.RecordDuration([]string{"time"}, map[string]string{}).End()
+
 	return im.mysql.DeleteMember(ctx, id)
 }

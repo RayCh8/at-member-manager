@@ -80,7 +80,7 @@ func (serv AtMemberManagerServer) UpdateMember(ctx context.Context, req *pb.Upda
 		logkit.ErrorV2(ctx, "UpdateMember parse id to int64 failed", err, nil)
 		return nil, err
 	}
-	m, err := serv.memberDao.UpdateMember(ctx, id, req.Name, req.Birthday)
+	m, err := serv.memberDao.UpdateMember(ctx, id, &dao.Member{Name: req.Name, Birthday: req.Birthday})
 
 	if err != nil {
 		logkit.ErrorV2(ctx, "dao.UpdateMember failed", err, nil)

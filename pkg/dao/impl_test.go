@@ -2,7 +2,6 @@ package dao
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -29,7 +28,7 @@ const (
 
 var (
 	mockCTX     = context.Background()
-	mockID      = int64(0)
+	mockID      = int64(1)
 	mockTimeNow time.Time
 	mockLoc     *time.Location
 )
@@ -160,7 +159,7 @@ func (s *daoSuite) TearDownTest() {
 	}))
 
 	// clean all in mysql
-	s.Require().NoError(s.db.Where("1 = 1").Delete(&Member{}).Error)
+	s.Require().NoError(s.db.Where("id = 1").Delete(&Member{}).Error)
 }
 
 func TestDAOSuite(t *testing.T) {
@@ -188,7 +187,7 @@ func (s *daoSuite) TestCreateMember() {
 
 				member := members[0]
 				s.Require().Equal(mockTimeNow, *member.CreatedAt, desc)
-				s.Require().Equal(int64(0), member.ID, desc)
+				s.Require().Equal(int64(1), member.ID, desc)
 				s.Require().Equal("ray", member.Name, desc)
 			},
 		},
@@ -214,45 +213,36 @@ func (s *daoSuite) TestUpdateMember() {
 		SetupTest func(string)
 		ID        int64
 		ExpErr    error
+		Name      string
+		Birthday  *time.Time
 		ExpMember *Member
 		CheckFunc func(string)
 	}{
 		{
-			Desc:   "not existed",
-			ID:     3,
-			ExpErr: fmt.Errorf("member not found"),
+			Desc:     "not existed",
+			ID:       3,
+			ExpErr:   gorm.ErrRecordNotFound,
+			Name:     "ray2",
+			Birthday: &mockTimeNow,
 		},
 		{
 			Desc: "normal case",
 			SetupTest: func(desc string) {
 				ms := []Member{
-					{CreatedAt: &mockTimeNow, UpdatedAt: &mockTimeNow, Name: "AT", Birthday: &mockTimeNow},
+					{ID: mockID, CreatedAt: &mockTimeNow, UpdatedAt: &mockTimeNow, Name: "ray", Birthday: &mockTimeNow},
 				}
 				s.Require().NoError(s.db.Create(&ms).Error, desc)
 			},
-			ID:     mockID,
-			ExpErr: nil,
+			ID:       mockID,
+			ExpErr:   nil,
+			Name:     "ray2",
+			Birthday: &mockTimeNow,
 			ExpMember: &Member{
 				ID:        mockID,
-				Name:      "ray",
+				Name:      "ray2",
 				Birthday:  &mockTimeNow,
 				CreatedAt: &mockTimeNow,
 				UpdatedAt: &mockTimeNow,
-			},
-			CheckFunc: func(desc string) {
-				// check cache
-				b, err := s.ring.Get(mockCTX, fmt.Sprintf("ca:members:%d", mockID)).Bytes()
-				s.Require().NoError(err, desc)
-
-				m := Member{}
-				s.Require().NoError(json.Unmarshal(b, &m), desc)
-				s.Require().Equal(Member{
-					ID:        mockID,
-					Name:      "ray",
-					Birthday:  &mockTimeNow,
-					CreatedAt: &mockTimeNow,
-					UpdatedAt: &mockTimeNow,
-				}, m, desc)
 			},
 		},
 	}
@@ -260,11 +250,15 @@ func (s *daoSuite) TestUpdateMember() {
 	for _, t := range tests {
 		s.SetupTest()
 
-		_, err := s.im.UpdateMember(mockCTX, t.ExpMember.ID, t.ExpMember.Name, t.ExpMember.Birthday)
-		s.Require().NoError(err, t.Desc)
+		if t.SetupTest != nil {
+			t.SetupTest(t.Desc)
+		}
 
-		if t.CheckFunc != nil {
-			t.CheckFunc(t.Desc)
+		m, err := s.im.UpdateMember(mockCTX, mockID, &Member{Name: t.Name, Birthday: t.Birthday})
+		s.Require().Equal(t.ExpErr, err, t.Desc)
+		if err == nil {
+			s.Require().Equal(t.ExpMember.Name, m.Name, t.Desc)
+			s.Require().Equal(t.ExpMember.Birthday, m.Birthday, t.Desc)
 		}
 
 		s.TearDownTest()
@@ -280,7 +274,7 @@ func (s *daoSuite) TestListMembers() {
 		CheckFunc  func(string)
 	}{
 		{
-			Desc:       "no records",
+			Desc:       "no members",
 			ExpErr:     nil,
 			ExpMembers: []Member{},
 		},
@@ -301,21 +295,6 @@ func (s *daoSuite) TestListMembers() {
 					CreatedAt: &mockTimeNow,
 					UpdatedAt: &mockTimeNow,
 				},
-			},
-			CheckFunc: func(desc string) {
-				// check cache
-				b, err := s.ring.Get(mockCTX, "ca:members:0-10").Bytes()
-				s.Require().NoError(err, desc)
-
-				rs := []Member{}
-				s.Require().NoError(json.Unmarshal(b, &rs), desc)
-				s.Require().Equal([]Member{{
-					ID:        mockID,
-					Name:      "ray",
-					Birthday:  &mockTimeNow,
-					CreatedAt: &mockTimeNow,
-					UpdatedAt: &mockTimeNow,
-				}}, rs, desc)
 			},
 		},
 	}
@@ -352,7 +331,7 @@ func (s *daoSuite) TestDeleteMember() {
 		{
 			Desc:   "not existed",
 			ID:     3,
-			ExpErr: fmt.Errorf("record not found"),
+			ExpErr: fmt.Errorf("member not found"),
 		},
 		{
 			Desc: "normal case",
@@ -364,19 +343,15 @@ func (s *daoSuite) TestDeleteMember() {
 			},
 			ID:     mockID,
 			ExpErr: nil,
-			CheckFunc: func(desc string) {
-				// check cache
-				b, err := s.ring.Get(mockCTX, fmt.Sprintf("ca:members:%d", mockID)).Bytes()
-				s.Require().NoError(err, desc)
-
-				r := Member{}
-				s.Require().NoError(json.Unmarshal(b, &r), desc)
-			},
 		},
 	}
 
 	for _, t := range tests {
 		s.SetupTest()
+
+		if t.SetupTest != nil {
+			t.SetupTest(t.Desc)
+		}
 
 		err := s.im.DeleteMember(mockCTX, mockID)
 		s.Require().NoError(err, t.Desc)
