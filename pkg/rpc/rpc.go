@@ -55,12 +55,13 @@ func (serv AtMemberManagerServer) CreateMember(ctx context.Context, req *pb.Crea
 		Birthday: req.Birthday,
 	}
 
-	if _, err := serv.memberDao.CreateMember(ctx, m); err != nil {
+	createM, err := serv.memberDao.CreateMember(ctx, m)
+	if err != nil {
 		logkit.ErrorV2(ctx, "dao.CreateMember failed", err, nil)
 		return nil, err
 	}
 
-	resp := pb.CreateMemberRes{Member: m.FormatPb()}
+	resp := pb.CreateMemberRes{Member: createM.FormatPb()}
 	rpcMet.SetGauge([]string{"resp_size"}, float64(unsafe.Sizeof(resp)), map[string]string{})
 
 	return &resp, nil
@@ -80,14 +81,14 @@ func (serv AtMemberManagerServer) UpdateMember(ctx context.Context, req *pb.Upda
 		logkit.ErrorV2(ctx, "UpdateMember parse id to int64 failed", err, nil)
 		return nil, err
 	}
-	m, err := serv.memberDao.UpdateMember(ctx, id, &dao.Member{Name: req.Name, Birthday: req.Birthday})
+	updateM, err := serv.memberDao.UpdateMember(ctx, id, &dao.Member{Name: req.Name, Birthday: req.Birthday})
 
 	if err != nil {
 		logkit.ErrorV2(ctx, "dao.UpdateMember failed", err, nil)
 		return nil, err
 	}
 
-	resp := pb.UpdateMemberRes{Member: m.FormatPb()}
+	resp := pb.UpdateMemberRes{Member: updateM.FormatPb()}
 	rpcMet.SetGauge([]string{"resp_size"}, float64(unsafe.Sizeof(resp)), map[string]string{})
 
 	return &resp, nil

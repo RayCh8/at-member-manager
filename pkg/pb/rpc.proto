@@ -35,14 +35,13 @@ service AtMemberManager {
     rpc ListMembers(ListMembersReq) returns (ListMembersRes) {
         option (google.api.http) = {
             get: "/api/members"
-            body: "member"
+            body: "members"
         };
     }
 
     rpc DeleteMember(DeleteMemberReq) returns (DeleteMemberRes) {
         option (google.api.http) = {
             delete: "/api/members/:id"
-            body: "member"
         };
     }
 }

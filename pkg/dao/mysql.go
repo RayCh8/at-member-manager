@@ -66,7 +66,7 @@ func (dao MySqlMemberDAO) ListMembers(ctx context.Context) ([]Member, error) {
 func (dao MySqlMemberDAO) DeleteMember(ctx context.Context, id int64) error {
 	defer met.RecordDuration([]string{"mysql", "time"}, map[string]string{}).End()
 
-	if err := dao.db.Where("id = ?", id).Delete(&Member{}).Error; err != nil {
+	if err := dao.db.Delete(&Member{}, id).Error; err != nil {
 		logkit.Debug(ctx, "Delete member failed", logkit.Payload{"err": err})
 		return err
 	}

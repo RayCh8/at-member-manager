@@ -16,11 +16,11 @@ type MemberDAO interface {
 }
 
 type Member struct {
-	ID        int64      `gorm:"type:bigint(20) NOT NULL auto_increment;primary_key;" json:"id,omitempty"`
-	Name      string     `gorm:"type:varchar(255) NOT NULL;" json:"name,omitempty"`
-	Birthday  *time.Time `gorm:"type:timestamp NOT NULL" json:"birthday,omitempty"`
-	CreatedAt *time.Time `gorm:"type:timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP" json:"created_at,omitempty"`
-	UpdatedAt *time.Time `gorm:"type:timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP" json:"updated_at,omitempty"`
+	ID        int64
+	Name      string
+	Birthday  *time.Time
+	CreatedAt *time.Time
+	UpdatedAt *time.Time
 }
 
 func (m *Member) FormatPb() *pb.Member {

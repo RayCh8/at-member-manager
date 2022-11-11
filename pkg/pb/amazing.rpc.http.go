@@ -3,6 +3,7 @@
 package pb
 
 import (
+	"bytes"
 	"io"
 	"net/http"
 
@@ -220,7 +221,20 @@ func (a *AmazingGinHttpAdapter) ListMembersHandler(ctx *gin.Context) {
 		return
 	}
 
-	output, err := jsonpbkit.MarshalToString(resp)
+	buf := make([]bytes.Buffer, len(resp.Members))
+	for i, m := range resp.Members {
+		m := m
+		var out bytes.Buffer
+		if err := jsonpbkit.Marshal(&out, m); err != nil {
+			logkit.Errorf(ctx, "marshal response failed", logkit.Payload{"err": err})
+			e := errorkit.NewFromError(errCodes.ErrMarshalResponseFailed, err, errorkit.WithHttpStatusCode(http.StatusInternalServerError))
+			ctx.JSON(e.HttpStatus(), e.GinHashMap())
+			return
+		}
+		buf[i] = out
+	}
+
+	output, err := jsonpbkit.MarshalJsonBuffersToString(buf)
 
 	if err != nil {
 		e := errorkit.FormatError(err)

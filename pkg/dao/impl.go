@@ -2,7 +2,6 @@ package dao
 
 import (
 	"context"
-	"time"
 
 	"gorm.io/gorm"
 
@@ -23,53 +22,10 @@ var (
 
 type impl struct {
 	mysql MySqlMemberDAO
-	cache cache.Cache
 }
 
 func NewMemberDAO(db *gorm.DB, cacheSrv cache.Service) MemberDAO {
 	im := &impl{mysql: NewMySqlMemberDAO(db)}
-
-	im.cache = cacheSrv.Create([]cache.Setting{
-		{
-			Prefix: pfxMember,
-			CacheAttributes: map[cache.Type]cache.Attribute{
-				cache.SharedCacheType: {TTL: time.Minute},
-				cache.LocalCacheType:  {TTL: 10 * time.Second},
-			},
-		},
-	})
-
-	/*
-		Use cases:
-			ctx := context.Background()
-
-			1) Get()
-
-			record := Record{}
-			if err := im.cache.Get(ctx, pfxRecord, "key", &record); err != nil {
-				return err
-			}
-
-			---
-
-			2) GetM()
-
-			records := []*Record{}
-			res, err := im.cache.MGet(ctx, pfxRecord, "key1", "key2", "key3")
-			if err != nil {
-				return err
-			}
-
-			for i := 0; i < res.Len(); i++ {
-				r := &Record{}
-				if err := res.Get(ctx, i, r); err != nil {
-					return err // It may be ErrCacheMiss or other errors
-				}
-				records = append(records, r)
-			}
-
-		More examples: https://github.com/AmazingTalker/go-cache
-	*/
 
 	return im
 }
