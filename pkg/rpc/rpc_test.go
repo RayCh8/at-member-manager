@@ -23,19 +23,19 @@ var (
 	mockID       = "0"
 	mockDate     = time.Now().AddDate(-18, -3, -3)
 	mockBirthday = time.Now().AddDate(-20, -5, -5)
-	mockMember   = &dao.Member{
+	mockMember1  = &dao.Member{
 		ID:        int64(0),
 		Name:      "Ray",
 		Birthday:  &mockDate,
-		CreatedAt: nil,
-		UpdatedAt: nil,
+		CreatedAt: &mockDate,
+		UpdatedAt: &mockDate,
 	}
 	mockMember2 = &dao.Member{
 		ID:        int64(0),
 		Name:      "AT",
 		Birthday:  &mockBirthday,
-		CreatedAt: nil,
-		UpdatedAt: nil,
+		CreatedAt: &mockDate,
+		UpdatedAt: &mockDate,
 	}
 )
 
@@ -126,14 +126,17 @@ func (s *rpcSuite) TestCreateMember() {
 			Desc: "create failed",
 			SetupTest: func(desc string) {
 				s.mockMember.On(
-					"CreateMember", mock.Anything, mockMember,
+					"CreateMember", mock.Anything, &dao.Member{
+						Name:     mockMember1.Name,
+						Birthday: mockMember1.Birthday,
+					},
 				).Return(
 					nil, errors.New("XD"),
 				).Once()
 			},
 			Req: &pb.CreateMemberReq{
-				Name:     mockMember.Name,
-				Birthday: mockMember.Birthday,
+				Name:     mockMember1.Name,
+				Birthday: mockMember1.Birthday,
 			},
 			ExpError: errors.New("XD"),
 		},
@@ -141,18 +144,21 @@ func (s *rpcSuite) TestCreateMember() {
 			Desc: "normal case",
 			SetupTest: func(desc string) {
 				s.mockMember.On(
-					"CreateMember", mock.Anything, mockMember,
+					"CreateMember", mock.Anything, &dao.Member{
+						Name:     mockMember1.Name,
+						Birthday: mockMember1.Birthday,
+					},
 				).Return(
-					mockMember, nil,
+					mockMember1, nil,
 				).Once()
 			},
 			Req: &pb.CreateMemberReq{
-				Name:     mockMember.Name,
-				Birthday: mockMember.Birthday,
+				Name:     mockMember1.Name,
+				Birthday: mockMember1.Birthday,
 			},
 			ExpError: nil,
 			ExpResp: &pb.CreateMemberRes{
-				Member: mockMember.FormatPb(),
+				Member: mockMember1.FormatPb(),
 			},
 		},
 	}
@@ -260,13 +266,13 @@ func (s *rpcSuite) TestListMember() {
 				s.mockMember.On(
 					"ListMembers", mock.Anything,
 				).Return(
-					[]dao.Member{*mockMember}, nil,
+					[]dao.Member{*mockMember1}, nil,
 				).Once()
 			},
 			Req:      &pb.ListMembersReq{},
 			ExpError: nil,
 			ExpResp: &pb.ListMembersRes{
-				Members: []*pb.Member{mockMember.FormatPb()},
+				Members: []*pb.Member{mockMember1.FormatPb()},
 			},
 		},
 	}

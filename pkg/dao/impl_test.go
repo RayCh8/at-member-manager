@@ -244,6 +244,13 @@ func (s *daoSuite) TestUpdateMember() {
 				CreatedAt: &mockTimeNow,
 				UpdatedAt: &mockTimeNow,
 			},
+			CheckFunc: func(desc string) {
+				member := Member{}
+				s.Require().NoError(s.db.First(&member, mockID).Error, desc)
+				s.Require().Equal(int64(1), member.ID, desc)
+				s.Require().Equal("ray2", member.Name, desc)
+				s.Require().Equal(mockTimeNow, *member.Birthday, desc)
+			},
 		},
 	}
 
@@ -282,7 +289,7 @@ func (s *daoSuite) TestListMembers() {
 			Desc: "normal case",
 			SetupTest: func(desc string) {
 				ms := []Member{
-					{CreatedAt: &mockTimeNow, UpdatedAt: &mockTimeNow, Name: "AT", Birthday: &mockTimeNow},
+					{ID: mockID, CreatedAt: &mockTimeNow, UpdatedAt: &mockTimeNow, Name: "AT", Birthday: &mockTimeNow},
 				}
 				s.Require().NoError(s.db.Create(&ms).Error, desc)
 			},
@@ -296,6 +303,19 @@ func (s *daoSuite) TestListMembers() {
 					UpdatedAt: &mockTimeNow,
 				},
 			},
+			CheckFunc: func(desc string) {
+				members := []Member{}
+				s.Require().NoError(s.db.Find(&members).Error, desc)
+				s.Require().Equal([]Member{
+					{
+						ID:        mockID,
+						Name:      "AT",
+						Birthday:  &mockTimeNow,
+						CreatedAt: &mockTimeNow,
+						UpdatedAt: &mockTimeNow,
+					},
+				}, members, desc)
+			},
 		},
 	}
 
@@ -306,10 +326,10 @@ func (s *daoSuite) TestListMembers() {
 			t.SetupTest(t.Desc)
 		}
 
-		members, err := s.im.ListMembers(mockCTX)
+		ms, err := s.im.ListMembers(mockCTX)
 		s.Require().Equal(t.ExpErr, err, t.Desc)
 		if err == nil {
-			s.Require().Equal(t.ExpMembers, members, t.Desc)
+			s.Require().Equal(t.ExpMembers, ms, t.Desc)
 		}
 
 		if t.CheckFunc != nil {
@@ -331,18 +351,22 @@ func (s *daoSuite) TestDeleteMember() {
 		{
 			Desc:   "not existed",
 			ID:     3,
-			ExpErr: fmt.Errorf("member not found"),
+			ExpErr: nil,
 		},
 		{
 			Desc: "normal case",
 			SetupTest: func(desc string) {
 				ms := []Member{
-					{CreatedAt: &mockTimeNow, UpdatedAt: &mockTimeNow, Name: "AT", Birthday: &mockTimeNow},
+					{ID: mockID, CreatedAt: &mockTimeNow, UpdatedAt: &mockTimeNow, Name: "AT", Birthday: &mockTimeNow},
 				}
 				s.Require().NoError(s.db.Create(&ms).Error, desc)
 			},
 			ID:     mockID,
 			ExpErr: nil,
+			CheckFunc: func(desc string) {
+				member := Member{}
+				s.Require().Equal(s.db.First(&member, mockID).Error, gorm.ErrRecordNotFound, desc)
+			},
 		},
 	}
 
@@ -353,8 +377,8 @@ func (s *daoSuite) TestDeleteMember() {
 			t.SetupTest(t.Desc)
 		}
 
-		err := s.im.DeleteMember(mockCTX, mockID)
-		s.Require().NoError(err, t.Desc)
+		err := s.im.DeleteMember(mockCTX, t.ID)
+		s.Require().Equal(t.ExpErr, err, t.Desc)
 
 		if t.CheckFunc != nil {
 			t.CheckFunc(t.Desc)
