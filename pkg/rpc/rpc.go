@@ -78,9 +78,11 @@ func (serv AtMemberManagerServer) UpdateMember(ctx context.Context, req *pb.Upda
 	}
 
 	ctx = logkit.EnrichPayload(ctx, logkit.Payload{"id": req.ID})
+
 	id, err := strconv.ParseInt(req.ID, 10, 64)
 	if err != nil {
 		logkit.ErrorV2(ctx, "UpdateMember parse id to int64 failed", err, nil)
+		err := errorkit.NewFromError(codes.ErrUnqualifiedParameters, err, errorkit.WithHttpStatusCode(400))
 		return nil, err
 	}
 	updateM, err := serv.memberDao.UpdateMember(ctx, id, &dao.Member{Name: req.Name, Birthday: req.Birthday})
