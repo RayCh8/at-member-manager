@@ -5,8 +5,10 @@ import (
 	"strconv"
 	"unsafe"
 
+	codes "github.com/AmazingTalker/at-error-code"
 	"github.com/AmazingTalker/at-member-manager/pkg/dao"
 	"github.com/AmazingTalker/at-member-manager/pkg/pb"
+	"github.com/AmazingTalker/go-rpc-kit/errorkit"
 	"github.com/AmazingTalker/go-rpc-kit/logkit"
 	"github.com/AmazingTalker/go-rpc-kit/metrickit"
 	"github.com/AmazingTalker/go-rpc-kit/validatorkit"
@@ -125,6 +127,7 @@ func (serv AtMemberManagerServer) DeleteMember(ctx context.Context, req *pb.Dele
 	id, err := strconv.ParseInt(req.ID, 10, 64)
 	if err != nil {
 		logkit.ErrorV2(ctx, "DeleteMember parse id to int64 failed", err, nil)
+		err := errorkit.NewFromError(codes.ErrUnqualifiedParameters, err, errorkit.WithHttpStatusCode(400))
 		return nil, err
 	}
 
