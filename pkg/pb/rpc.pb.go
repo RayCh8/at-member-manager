@@ -37,25 +37,25 @@ var _ = time.Kitchen
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-type Record struct {
-	ID        string     `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	TheNum    int64      `protobuf:"varint,2,opt,name=the_num,json=theNum,proto3" json:"theNum"`
-	TheStr    string     `protobuf:"bytes,3,opt,name=the_str,json=theStr,proto3" json:"theStr"`
-	CreatedAt *time.Time `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3,stdtime,wktptr" json:"createdAt"`
-	UpdatedAt *time.Time `protobuf:"bytes,5,opt,name=updated_at,json=updatedAt,proto3,stdtime,wktptr" json:"updatedAt"`
+type Member struct {
+	ID        int64      `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name      string     `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
+	Birthday  *time.Time `protobuf:"bytes,3,opt,name=birthday,proto3,stdtime,wktptr" json:"birthday"`
+	CreatedAt *time.Time `protobuf:"bytes,4,opt,name=created_at,proto3,stdtime,wktptr" json:"created_at"`
+	UpdatedAt *time.Time `protobuf:"bytes,5,opt,name=updated_at,proto3,stdtime,wktptr" json:"updated_at"`
 }
 
-func (m *Record) Reset()      { *m = Record{} }
-func (*Record) ProtoMessage() {}
-func (*Record) Descriptor() ([]byte, []int) {
+func (m *Member) Reset()      { *m = Member{} }
+func (*Member) ProtoMessage() {}
+func (*Member) Descriptor() ([]byte, []int) {
 	return fileDescriptor_db28b008f832a8c4, []int{0}
 }
-func (m *Record) XXX_Unmarshal(b []byte) error {
+func (m *Member) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *Record) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *Member) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_Record.Marshal(b, m, deterministic)
+		return xxx_messageInfo_Member.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -65,47 +65,47 @@ func (m *Record) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 		return b[:n], nil
 	}
 }
-func (m *Record) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Record.Merge(m, src)
+func (m *Member) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Member.Merge(m, src)
 }
-func (m *Record) XXX_Size() int {
+func (m *Member) XXX_Size() int {
 	return m.Size()
 }
-func (m *Record) XXX_DiscardUnknown() {
-	xxx_messageInfo_Record.DiscardUnknown(m)
+func (m *Member) XXX_DiscardUnknown() {
+	xxx_messageInfo_Member.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_Record proto.InternalMessageInfo
+var xxx_messageInfo_Member proto.InternalMessageInfo
 
-func (m *Record) GetID() string {
+func (m *Member) GetID() int64 {
 	if m != nil {
 		return m.ID
-	}
-	return ""
-}
-
-func (m *Record) GetTheNum() int64 {
-	if m != nil {
-		return m.TheNum
 	}
 	return 0
 }
 
-func (m *Record) GetTheStr() string {
+func (m *Member) GetName() string {
 	if m != nil {
-		return m.TheStr
+		return m.Name
 	}
 	return ""
 }
 
-func (m *Record) GetCreatedAt() *time.Time {
+func (m *Member) GetBirthday() *time.Time {
+	if m != nil {
+		return m.Birthday
+	}
+	return nil
+}
+
+func (m *Member) GetCreatedAt() *time.Time {
 	if m != nil {
 		return m.CreatedAt
 	}
 	return nil
 }
 
-func (m *Record) GetUpdatedAt() *time.Time {
+func (m *Member) GetUpdatedAt() *time.Time {
 	if m != nil {
 		return m.UpdatedAt
 	}
@@ -190,20 +190,22 @@ func (m *HealthRes) GetOk() bool {
 	return false
 }
 
-type ConfigReq struct {
+type CreateMemberReq struct {
+	Name     string     `protobuf:"bytes,1,opt,name=name,proto3" json:"name" validate:"required"`
+	Birthday *time.Time `protobuf:"bytes,2,opt,name=birthday,proto3,stdtime,wktptr" json:"birthday" validate:"required"`
 }
 
-func (m *ConfigReq) Reset()      { *m = ConfigReq{} }
-func (*ConfigReq) ProtoMessage() {}
-func (*ConfigReq) Descriptor() ([]byte, []int) {
+func (m *CreateMemberReq) Reset()      { *m = CreateMemberReq{} }
+func (*CreateMemberReq) ProtoMessage() {}
+func (*CreateMemberReq) Descriptor() ([]byte, []int) {
 	return fileDescriptor_db28b008f832a8c4, []int{3}
 }
-func (m *ConfigReq) XXX_Unmarshal(b []byte) error {
+func (m *CreateMemberReq) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *ConfigReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *CreateMemberReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_ConfigReq.Marshal(b, m, deterministic)
+		return xxx_messageInfo_CreateMemberReq.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -213,35 +215,47 @@ func (m *ConfigReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 		return b[:n], nil
 	}
 }
-func (m *ConfigReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ConfigReq.Merge(m, src)
+func (m *CreateMemberReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CreateMemberReq.Merge(m, src)
 }
-func (m *ConfigReq) XXX_Size() int {
+func (m *CreateMemberReq) XXX_Size() int {
 	return m.Size()
 }
-func (m *ConfigReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_ConfigReq.DiscardUnknown(m)
+func (m *CreateMemberReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_CreateMemberReq.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_ConfigReq proto.InternalMessageInfo
+var xxx_messageInfo_CreateMemberReq proto.InternalMessageInfo
 
-type ConfigRes struct {
-	Enable bool   `protobuf:"varint,1,opt,name=enable,proto3" json:"enable,omitempty"`
-	Num    int64  `protobuf:"varint,2,opt,name=num,proto3" json:"num,omitempty"`
-	Str    string `protobuf:"bytes,3,opt,name=str,proto3" json:"str,omitempty"`
+func (m *CreateMemberReq) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
 }
 
-func (m *ConfigRes) Reset()      { *m = ConfigRes{} }
-func (*ConfigRes) ProtoMessage() {}
-func (*ConfigRes) Descriptor() ([]byte, []int) {
+func (m *CreateMemberReq) GetBirthday() *time.Time {
+	if m != nil {
+		return m.Birthday
+	}
+	return nil
+}
+
+type CreateMemberRes struct {
+	Member *Member `protobuf:"bytes,1,opt,name=member,proto3" json:"member,omitempty"`
+}
+
+func (m *CreateMemberRes) Reset()      { *m = CreateMemberRes{} }
+func (*CreateMemberRes) ProtoMessage() {}
+func (*CreateMemberRes) Descriptor() ([]byte, []int) {
 	return fileDescriptor_db28b008f832a8c4, []int{4}
 }
-func (m *ConfigRes) XXX_Unmarshal(b []byte) error {
+func (m *CreateMemberRes) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *ConfigRes) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *CreateMemberRes) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_ConfigRes.Marshal(b, m, deterministic)
+		return xxx_messageInfo_CreateMemberRes.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -251,56 +265,42 @@ func (m *ConfigRes) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 		return b[:n], nil
 	}
 }
-func (m *ConfigRes) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ConfigRes.Merge(m, src)
+func (m *CreateMemberRes) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CreateMemberRes.Merge(m, src)
 }
-func (m *ConfigRes) XXX_Size() int {
+func (m *CreateMemberRes) XXX_Size() int {
 	return m.Size()
 }
-func (m *ConfigRes) XXX_DiscardUnknown() {
-	xxx_messageInfo_ConfigRes.DiscardUnknown(m)
+func (m *CreateMemberRes) XXX_DiscardUnknown() {
+	xxx_messageInfo_CreateMemberRes.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_ConfigRes proto.InternalMessageInfo
+var xxx_messageInfo_CreateMemberRes proto.InternalMessageInfo
 
-func (m *ConfigRes) GetEnable() bool {
+func (m *CreateMemberRes) GetMember() *Member {
 	if m != nil {
-		return m.Enable
+		return m.Member
 	}
-	return false
+	return nil
 }
 
-func (m *ConfigRes) GetNum() int64 {
-	if m != nil {
-		return m.Num
-	}
-	return 0
+type UpdateMemberReq struct {
+	ID       string     `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Name     string     `protobuf:"bytes,2,opt,name=name,proto3" json:"name" validate:"required"`
+	Birthday *time.Time `protobuf:"bytes,3,opt,name=birthday,proto3,stdtime,wktptr" json:"birthday" validate:"required"`
 }
 
-func (m *ConfigRes) GetStr() string {
-	if m != nil {
-		return m.Str
-	}
-	return ""
-}
-
-type CreateRecordReq struct {
-	TheNum    int64      `protobuf:"varint,1,opt,name=the_num,json=theNum,proto3" json:"theNum"`
-	TheStr    string     `protobuf:"bytes,2,opt,name=the_str,json=theStr,proto3" json:"theStr"`
-	CreatedAt *time.Time `protobuf:"bytes,3,opt,name=created_at,json=createdAt,proto3,stdtime,wktptr" json:"createdAt"`
-}
-
-func (m *CreateRecordReq) Reset()      { *m = CreateRecordReq{} }
-func (*CreateRecordReq) ProtoMessage() {}
-func (*CreateRecordReq) Descriptor() ([]byte, []int) {
+func (m *UpdateMemberReq) Reset()      { *m = UpdateMemberReq{} }
+func (*UpdateMemberReq) ProtoMessage() {}
+func (*UpdateMemberReq) Descriptor() ([]byte, []int) {
 	return fileDescriptor_db28b008f832a8c4, []int{5}
 }
-func (m *CreateRecordReq) XXX_Unmarshal(b []byte) error {
+func (m *UpdateMemberReq) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *CreateRecordReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *UpdateMemberReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_CreateRecordReq.Marshal(b, m, deterministic)
+		return xxx_messageInfo_UpdateMemberReq.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -310,140 +310,132 @@ func (m *CreateRecordReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, err
 		return b[:n], nil
 	}
 }
-func (m *CreateRecordReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_CreateRecordReq.Merge(m, src)
+func (m *UpdateMemberReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateMemberReq.Merge(m, src)
 }
-func (m *CreateRecordReq) XXX_Size() int {
+func (m *UpdateMemberReq) XXX_Size() int {
 	return m.Size()
 }
-func (m *CreateRecordReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_CreateRecordReq.DiscardUnknown(m)
+func (m *UpdateMemberReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateMemberReq.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_CreateRecordReq proto.InternalMessageInfo
+var xxx_messageInfo_UpdateMemberReq proto.InternalMessageInfo
 
-func (m *CreateRecordReq) GetTheNum() int64 {
-	if m != nil {
-		return m.TheNum
-	}
-	return 0
-}
-
-func (m *CreateRecordReq) GetTheStr() string {
-	if m != nil {
-		return m.TheStr
-	}
-	return ""
-}
-
-func (m *CreateRecordReq) GetCreatedAt() *time.Time {
-	if m != nil {
-		return m.CreatedAt
-	}
-	return nil
-}
-
-type CreateRecordRes struct {
-	Record *Record `protobuf:"bytes,1,opt,name=record,proto3" json:"record,omitempty"`
-}
-
-func (m *CreateRecordRes) Reset()      { *m = CreateRecordRes{} }
-func (*CreateRecordRes) ProtoMessage() {}
-func (*CreateRecordRes) Descriptor() ([]byte, []int) {
-	return fileDescriptor_db28b008f832a8c4, []int{6}
-}
-func (m *CreateRecordRes) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *CreateRecordRes) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_CreateRecordRes.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *CreateRecordRes) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_CreateRecordRes.Merge(m, src)
-}
-func (m *CreateRecordRes) XXX_Size() int {
-	return m.Size()
-}
-func (m *CreateRecordRes) XXX_DiscardUnknown() {
-	xxx_messageInfo_CreateRecordRes.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_CreateRecordRes proto.InternalMessageInfo
-
-func (m *CreateRecordRes) GetRecord() *Record {
-	if m != nil {
-		return m.Record
-	}
-	return nil
-}
-
-type GetRecordReq struct {
-	ID string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
-}
-
-func (m *GetRecordReq) Reset()      { *m = GetRecordReq{} }
-func (*GetRecordReq) ProtoMessage() {}
-func (*GetRecordReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_db28b008f832a8c4, []int{7}
-}
-func (m *GetRecordReq) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *GetRecordReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_GetRecordReq.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *GetRecordReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetRecordReq.Merge(m, src)
-}
-func (m *GetRecordReq) XXX_Size() int {
-	return m.Size()
-}
-func (m *GetRecordReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetRecordReq.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_GetRecordReq proto.InternalMessageInfo
-
-func (m *GetRecordReq) GetID() string {
+func (m *UpdateMemberReq) GetID() string {
 	if m != nil {
 		return m.ID
 	}
 	return ""
 }
 
-type GetRecordRes struct {
-	Record *Record `protobuf:"bytes,1,opt,name=record,proto3" json:"record,omitempty"`
+func (m *UpdateMemberReq) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
 }
 
-func (m *GetRecordRes) Reset()      { *m = GetRecordRes{} }
-func (*GetRecordRes) ProtoMessage() {}
-func (*GetRecordRes) Descriptor() ([]byte, []int) {
+func (m *UpdateMemberReq) GetBirthday() *time.Time {
+	if m != nil {
+		return m.Birthday
+	}
+	return nil
+}
+
+type UpdateMemberRes struct {
+	Member *Member `protobuf:"bytes,1,opt,name=member,proto3" json:"member,omitempty"`
+}
+
+func (m *UpdateMemberRes) Reset()      { *m = UpdateMemberRes{} }
+func (*UpdateMemberRes) ProtoMessage() {}
+func (*UpdateMemberRes) Descriptor() ([]byte, []int) {
+	return fileDescriptor_db28b008f832a8c4, []int{6}
+}
+func (m *UpdateMemberRes) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *UpdateMemberRes) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_UpdateMemberRes.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *UpdateMemberRes) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateMemberRes.Merge(m, src)
+}
+func (m *UpdateMemberRes) XXX_Size() int {
+	return m.Size()
+}
+func (m *UpdateMemberRes) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateMemberRes.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UpdateMemberRes proto.InternalMessageInfo
+
+func (m *UpdateMemberRes) GetMember() *Member {
+	if m != nil {
+		return m.Member
+	}
+	return nil
+}
+
+type ListMembersReq struct {
+}
+
+func (m *ListMembersReq) Reset()      { *m = ListMembersReq{} }
+func (*ListMembersReq) ProtoMessage() {}
+func (*ListMembersReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_db28b008f832a8c4, []int{7}
+}
+func (m *ListMembersReq) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ListMembersReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ListMembersReq.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ListMembersReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ListMembersReq.Merge(m, src)
+}
+func (m *ListMembersReq) XXX_Size() int {
+	return m.Size()
+}
+func (m *ListMembersReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_ListMembersReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ListMembersReq proto.InternalMessageInfo
+
+type ListMembersRes struct {
+	Members []*Member `protobuf:"bytes,1,rep,name=members,proto3" json:"members,omitempty"`
+}
+
+func (m *ListMembersRes) Reset()      { *m = ListMembersRes{} }
+func (*ListMembersRes) ProtoMessage() {}
+func (*ListMembersRes) Descriptor() ([]byte, []int) {
 	return fileDescriptor_db28b008f832a8c4, []int{8}
 }
-func (m *GetRecordRes) XXX_Unmarshal(b []byte) error {
+func (m *ListMembersRes) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *GetRecordRes) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *ListMembersRes) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_GetRecordRes.Marshal(b, m, deterministic)
+		return xxx_messageInfo_ListMembersRes.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -453,42 +445,40 @@ func (m *GetRecordRes) XXX_Marshal(b []byte, deterministic bool) ([]byte, error)
 		return b[:n], nil
 	}
 }
-func (m *GetRecordRes) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetRecordRes.Merge(m, src)
+func (m *ListMembersRes) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ListMembersRes.Merge(m, src)
 }
-func (m *GetRecordRes) XXX_Size() int {
+func (m *ListMembersRes) XXX_Size() int {
 	return m.Size()
 }
-func (m *GetRecordRes) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetRecordRes.DiscardUnknown(m)
+func (m *ListMembersRes) XXX_DiscardUnknown() {
+	xxx_messageInfo_ListMembersRes.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetRecordRes proto.InternalMessageInfo
+var xxx_messageInfo_ListMembersRes proto.InternalMessageInfo
 
-func (m *GetRecordRes) GetRecord() *Record {
+func (m *ListMembersRes) GetMembers() []*Member {
 	if m != nil {
-		return m.Record
+		return m.Members
 	}
 	return nil
 }
 
-type ListRecordReq struct {
-	// keys from url queryString or url params is always type of string.
-	PageSize string `protobuf:"bytes,1,opt,name=size,proto3" json:"size" validate:"required"`
-	Page     string `protobuf:"bytes,2,opt,name=page,proto3" json:"page" validate:"required"`
+type DeleteMemberReq struct {
+	ID string `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
 }
 
-func (m *ListRecordReq) Reset()      { *m = ListRecordReq{} }
-func (*ListRecordReq) ProtoMessage() {}
-func (*ListRecordReq) Descriptor() ([]byte, []int) {
+func (m *DeleteMemberReq) Reset()      { *m = DeleteMemberReq{} }
+func (*DeleteMemberReq) ProtoMessage() {}
+func (*DeleteMemberReq) Descriptor() ([]byte, []int) {
 	return fileDescriptor_db28b008f832a8c4, []int{9}
 }
-func (m *ListRecordReq) XXX_Unmarshal(b []byte) error {
+func (m *DeleteMemberReq) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *ListRecordReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *DeleteMemberReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_ListRecordReq.Marshal(b, m, deterministic)
+		return xxx_messageInfo_DeleteMemberReq.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -498,47 +488,39 @@ func (m *ListRecordReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error
 		return b[:n], nil
 	}
 }
-func (m *ListRecordReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ListRecordReq.Merge(m, src)
+func (m *DeleteMemberReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteMemberReq.Merge(m, src)
 }
-func (m *ListRecordReq) XXX_Size() int {
+func (m *DeleteMemberReq) XXX_Size() int {
 	return m.Size()
 }
-func (m *ListRecordReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_ListRecordReq.DiscardUnknown(m)
+func (m *DeleteMemberReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteMemberReq.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_ListRecordReq proto.InternalMessageInfo
+var xxx_messageInfo_DeleteMemberReq proto.InternalMessageInfo
 
-func (m *ListRecordReq) GetPageSize() string {
+func (m *DeleteMemberReq) GetID() string {
 	if m != nil {
-		return m.PageSize
+		return m.ID
 	}
 	return ""
 }
 
-func (m *ListRecordReq) GetPage() string {
-	if m != nil {
-		return m.Page
-	}
-	return ""
+type DeleteMemberRes struct {
 }
 
-type ListRecordRes struct {
-	Records []*Record `protobuf:"bytes,1,rep,name=records,proto3" json:"records,omitempty"`
-}
-
-func (m *ListRecordRes) Reset()      { *m = ListRecordRes{} }
-func (*ListRecordRes) ProtoMessage() {}
-func (*ListRecordRes) Descriptor() ([]byte, []int) {
+func (m *DeleteMemberRes) Reset()      { *m = DeleteMemberRes{} }
+func (*DeleteMemberRes) ProtoMessage() {}
+func (*DeleteMemberRes) Descriptor() ([]byte, []int) {
 	return fileDescriptor_db28b008f832a8c4, []int{10}
 }
-func (m *ListRecordRes) XXX_Unmarshal(b []byte) error {
+func (m *DeleteMemberRes) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *ListRecordRes) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *DeleteMemberRes) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_ListRecordRes.Marshal(b, m, deterministic)
+		return xxx_messageInfo_DeleteMemberRes.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -548,105 +530,96 @@ func (m *ListRecordRes) XXX_Marshal(b []byte, deterministic bool) ([]byte, error
 		return b[:n], nil
 	}
 }
-func (m *ListRecordRes) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ListRecordRes.Merge(m, src)
+func (m *DeleteMemberRes) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteMemberRes.Merge(m, src)
 }
-func (m *ListRecordRes) XXX_Size() int {
+func (m *DeleteMemberRes) XXX_Size() int {
 	return m.Size()
 }
-func (m *ListRecordRes) XXX_DiscardUnknown() {
-	xxx_messageInfo_ListRecordRes.DiscardUnknown(m)
+func (m *DeleteMemberRes) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteMemberRes.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_ListRecordRes proto.InternalMessageInfo
-
-func (m *ListRecordRes) GetRecords() []*Record {
-	if m != nil {
-		return m.Records
-	}
-	return nil
-}
+var xxx_messageInfo_DeleteMemberRes proto.InternalMessageInfo
 
 func init() {
-	proto.RegisterType((*Record)(nil), "pb.Record")
+	proto.RegisterType((*Member)(nil), "pb.Member")
 	proto.RegisterType((*HealthReq)(nil), "pb.HealthReq")
 	proto.RegisterType((*HealthRes)(nil), "pb.HealthRes")
-	proto.RegisterType((*ConfigReq)(nil), "pb.ConfigReq")
-	proto.RegisterType((*ConfigRes)(nil), "pb.ConfigRes")
-	proto.RegisterType((*CreateRecordReq)(nil), "pb.CreateRecordReq")
-	proto.RegisterType((*CreateRecordRes)(nil), "pb.CreateRecordRes")
-	proto.RegisterType((*GetRecordReq)(nil), "pb.GetRecordReq")
-	proto.RegisterType((*GetRecordRes)(nil), "pb.GetRecordRes")
-	proto.RegisterType((*ListRecordReq)(nil), "pb.ListRecordReq")
-	proto.RegisterType((*ListRecordRes)(nil), "pb.ListRecordRes")
+	proto.RegisterType((*CreateMemberReq)(nil), "pb.CreateMemberReq")
+	proto.RegisterType((*CreateMemberRes)(nil), "pb.CreateMemberRes")
+	proto.RegisterType((*UpdateMemberReq)(nil), "pb.UpdateMemberReq")
+	proto.RegisterType((*UpdateMemberRes)(nil), "pb.UpdateMemberRes")
+	proto.RegisterType((*ListMembersReq)(nil), "pb.ListMembersReq")
+	proto.RegisterType((*ListMembersRes)(nil), "pb.ListMembersRes")
+	proto.RegisterType((*DeleteMemberReq)(nil), "pb.DeleteMemberReq")
+	proto.RegisterType((*DeleteMemberRes)(nil), "pb.DeleteMemberRes")
 }
 
 func init() { proto.RegisterFile("pkg/pb/rpc.proto", fileDescriptor_db28b008f832a8c4) }
 
 var fileDescriptor_db28b008f832a8c4 = []byte{
-	// 825 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x95, 0xcf, 0x8b, 0x1c, 0x45,
-	0x14, 0xc7, 0xa7, 0x7a, 0xc6, 0xde, 0x9d, 0x9a, 0x8d, 0x59, 0x2b, 0x26, 0x0e, 0x1d, 0xec, 0x1e,
-	0x0a, 0x8c, 0x8b, 0x90, 0xee, 0xcd, 0xaa, 0x04, 0xf6, 0x96, 0x49, 0x60, 0x57, 0x0c, 0xa2, 0xbd,
-	0x9b, 0x8b, 0x20, 0x6b, 0xcd, 0x74, 0xa5, 0xa7, 0xd8, 0x99, 0xe9, 0xde, 0xae, 0x6a, 0xc1, 0x3d,
-	0x89, 0x47, 0x21, 0x10, 0xf4, 0x0f, 0xd0, 0xa3, 0xf8, 0x37, 0xf8, 0x07, 0x78, 0x92, 0x05, 0x2f,
-	0x39, 0x75, 0xdc, 0x5e, 0x0f, 0x32, 0xa7, 0xe0, 0x45, 0x10, 0x04, 0xa9, 0x1f, 0x3d, 0xd3, 0xb3,
-	0x0a, 0xba, 0x92, 0xd3, 0xd4, 0x7b, 0xfd, 0x79, 0xdf, 0x79, 0xf5, 0x7e, 0x74, 0xc3, 0xf5, 0xf4,
-	0x30, 0x0e, 0xd2, 0x41, 0x90, 0xa5, 0x43, 0x3f, 0xcd, 0x12, 0x91, 0x20, 0x2b, 0x1d, 0x38, 0x1b,
-	0x62, 0xc4, 0xb2, 0xe8, 0x20, 0x25, 0x99, 0xf8, 0x34, 0x88, 0x93, 0x24, 0x1e, 0xd3, 0x80, 0xa4,
-	0x2c, 0x20, 0xd3, 0x69, 0x22, 0x88, 0x60, 0xc9, 0x94, 0x6b, 0xda, 0xe9, 0x2d, 0x93, 0x71, 0xa2,
-	0xdc, 0xea, 0x64, 0x88, 0xd7, 0xeb, 0x04, 0x99, 0x90, 0x63, 0x36, 0x8d, 0x05, 0x19, 0x1f, 0xd2,
-	0x2c, 0x20, 0x42, 0x21, 0x06, 0xf4, 0xcc, 0x1f, 0x29, 0x6b, 0x90, 0x3f, 0x0c, 0x04, 0x9b, 0x50,
-	0x2e, 0xc8, 0x24, 0xd5, 0x00, 0xfe, 0xde, 0x82, 0x76, 0x48, 0x87, 0x49, 0x16, 0xa1, 0x6b, 0xd0,
-	0x62, 0x51, 0x17, 0xf4, 0xc0, 0x46, 0xbb, 0x6f, 0x97, 0x85, 0x67, 0xbd, 0x73, 0x2f, 0xb4, 0x58,
-	0x84, 0x6e, 0xc2, 0x15, 0x31, 0xa2, 0x07, 0xd3, 0x7c, 0xd2, 0xb5, 0x7a, 0x60, 0xa3, 0xd9, 0x7f,
-	0xb9, 0x2c, 0x3c, 0x7b, 0x7f, 0x44, 0xdf, 0xcb, 0x27, 0xb3, 0xc2, 0xb3, 0x85, 0x3a, 0x85, 0xe6,
-	0xb7, 0xc2, 0xb9, 0xc8, 0xba, 0x4d, 0xa5, 0x55, 0xe1, 0x7b, 0x22, 0x33, 0xf8, 0x9e, 0xc8, 0x42,
-	0xf3, 0x8b, 0x3e, 0x82, 0x70, 0x98, 0x51, 0x22, 0x68, 0x74, 0x40, 0x44, 0xb7, 0xd5, 0x03, 0x1b,
-	0x9d, 0x2d, 0xc7, 0xd7, 0x69, 0xfb, 0x55, 0xda, 0xfe, 0x7e, 0x95, 0x76, 0x1f, 0x97, 0x85, 0xd7,
-	0xbe, 0xab, 0x23, 0xee, 0x88, 0x59, 0xe1, 0xb5, 0x87, 0x95, 0xf1, 0xf8, 0xa9, 0x07, 0xbe, 0x79,
-	0xea, 0x81, 0x70, 0xe1, 0x92, 0xf2, 0x79, 0x1a, 0x55, 0xf2, 0x2f, 0xfc, 0x37, 0xf9, 0x07, 0x3a,
-	0x42, 0xcb, 0xe7, 0x95, 0xb1, 0x90, 0x9f, 0xbb, 0x70, 0x07, 0xb6, 0x77, 0x29, 0x19, 0x8b, 0x51,
-	0x48, 0x8f, 0xf0, 0xf5, 0x85, 0xc1, 0xd1, 0x8b, 0xd0, 0x4a, 0x0e, 0x55, 0x35, 0x57, 0x43, 0x2b,
-	0x39, 0x94, 0xe4, 0xdd, 0x64, 0xfa, 0x90, 0xc5, 0x92, 0xdc, 0x59, 0x18, 0x1c, 0x5d, 0x83, 0x36,
-	0x9d, 0x92, 0xc1, 0x98, 0x1a, 0xda, 0x58, 0x68, 0x1d, 0x36, 0xe7, 0x35, 0x0f, 0xe5, 0x51, 0x7a,
-	0xe6, 0x65, 0x0d, 0xe5, 0x11, 0xff, 0x08, 0xe0, 0x65, 0x5d, 0x0c, 0xdd, 0xc4, 0x90, 0x1e, 0xd5,
-	0xfb, 0x05, 0x2e, 0xd6, 0x2f, 0xeb, 0xc2, 0xfd, 0x6a, 0x3e, 0xe7, 0x7e, 0xe1, 0x77, 0xcf, 0xdf,
-	0x87, 0x23, 0x1f, 0xda, 0x99, 0x32, 0xd4, 0x75, 0x3a, 0x5b, 0xd0, 0x4f, 0x07, 0xbe, 0x7e, 0xdc,
-	0x87, 0x32, 0x57, 0x83, 0x1a, 0x6a, 0x7b, 0xf5, 0xbb, 0x3f, 0x1f, 0xdd, 0x68, 0x6e, 0x6d, 0xde,
-	0xc2, 0x6f, 0xc3, 0xb5, 0x1d, 0x2a, 0x16, 0x95, 0x79, 0xad, 0x36, 0xe1, 0x57, 0xf5, 0x84, 0xcf,
-	0x0a, 0xcf, 0x62, 0xd1, 0x97, 0xbf, 0x3f, 0xba, 0xd1, 0x12, 0x59, 0x4e, 0xe5, 0xc0, 0xe3, 0xdd,
-	0xa5, 0xb0, 0xff, 0x9f, 0xc0, 0x26, 0xfe, 0x1a, 0xc0, 0x4b, 0xf7, 0x19, 0xaf, 0xa5, 0xb0, 0x0b,
-	0x5b, 0x9c, 0x1d, 0x53, 0x93, 0xc4, 0x5b, 0x65, 0xe1, 0xad, 0xbe, 0x4f, 0x62, 0xba, 0xc7, 0x8e,
-	0xe9, 0xac, 0xf0, 0xd4, 0xb3, 0xdf, 0x0a, 0xef, 0xca, 0x27, 0x64, 0xcc, 0xe4, 0x8c, 0x6d, 0xe3,
-	0x8c, 0x1e, 0xe5, 0x2c, 0xa3, 0x11, 0xfe, 0x62, 0x9e, 0xa3, 0xa2, 0xd0, 0x3d, 0xd8, 0x4a, 0x49,
-	0x4c, 0x4d, 0xd3, 0x36, 0xcb, 0xc2, 0x6b, 0x49, 0x25, 0xa9, 0x22, 0xfd, 0xff, 0xae, 0x22, 0x29,
-	0x7c, 0x7f, 0x39, 0x41, 0x8e, 0x6e, 0xc1, 0x15, 0x7d, 0x0d, 0xde, 0x05, 0xbd, 0xe6, 0xb9, 0xdb,
-	0x76, 0xca, 0xc2, 0x5b, 0xd1, 0x67, 0x1e, 0x56, 0xdc, 0xe2, 0xbe, 0x5b, 0x7f, 0x58, 0xb0, 0xbd,
-	0x93, 0xdc, 0xd1, 0x2f, 0x24, 0x74, 0x1b, 0xda, 0x7a, 0x1f, 0xd0, 0x25, 0xa9, 0x31, 0x5f, 0x14,
-	0x67, 0xc9, 0xe4, 0xf8, 0xf2, 0xe7, 0x3f, 0xfd, 0xf2, 0x95, 0xd5, 0x46, 0x2b, 0xc1, 0x48, 0xe3,
-	0xb7, 0xa1, 0xad, 0xd7, 0x43, 0x07, 0xce, 0xf7, 0xc6, 0x59, 0x32, 0xeb, 0x81, 0x43, 0x8d, 0x3f,
-	0x80, 0x6b, 0xf5, 0xe9, 0x41, 0x57, 0x14, 0xbf, 0xbc, 0x1f, 0xce, 0x3f, 0x38, 0x39, 0xbe, 0xae,
-	0xa4, 0xae, 0xe2, 0x8e, 0x7a, 0x27, 0x9b, 0x46, 0x9a, 0x86, 0xa2, 0x0f, 0x60, 0x7b, 0x3e, 0x10,
-	0x68, 0x5d, 0x86, 0xd7, 0xc7, 0xca, 0x39, 0xef, 0xe1, 0xb8, 0xa7, 0xd4, 0x1c, 0xb4, 0x5e, 0x53,
-	0xe3, 0xc1, 0x36, 0xab, 0x4b, 0xc2, 0x45, 0xdd, 0xd1, 0x4b, 0x52, 0x61, 0x69, 0x50, 0x9c, 0xbf,
-	0xb9, 0x38, 0x7e, 0x55, 0xa9, 0xbe, 0x82, 0xd6, 0xea, 0xaa, 0xdb, 0x55, 0x1b, 0xfa, 0x1f, 0x9f,
-	0x9c, 0xba, 0x8d, 0x27, 0xa7, 0x6e, 0xe3, 0xd9, 0xa9, 0x0b, 0x3e, 0x2b, 0x5d, 0xf0, 0x6d, 0xe9,
-	0x82, 0x1f, 0x4a, 0x17, 0x9c, 0x94, 0x2e, 0xf8, 0xb9, 0x74, 0xc1, 0xaf, 0xa5, 0xdb, 0x78, 0x56,
-	0xba, 0xe0, 0xf1, 0x99, 0xdb, 0x38, 0x39, 0x73, 0x1b, 0x4f, 0xce, 0xdc, 0xc6, 0x87, 0x6f, 0xc4,
-	0x4c, 0x8c, 0xf2, 0x81, 0x3f, 0x4c, 0x26, 0x81, 0x69, 0xdc, 0xbe, 0xfe, 0x92, 0xc4, 0xc9, 0x4d,
-	0xf3, 0x69, 0x09, 0xf4, 0x07, 0x6d, 0x60, 0xab, 0xfd, 0x7e, 0xf3, 0xaf, 0x00, 0x00, 0x00, 0xff,
-	0xff, 0xa1, 0x31, 0x5c, 0x68, 0xe1, 0x06, 0x00, 0x00,
+	// 786 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x55, 0xbf, 0x6f, 0xf3, 0x44,
+	0x18, 0xce, 0x39, 0x21, 0x4d, 0x2e, 0xe1, 0x4b, 0x74, 0x9f, 0x28, 0x91, 0x0b, 0x76, 0x74, 0x40,
+	0x1b, 0x21, 0xd5, 0x6e, 0x03, 0x52, 0x51, 0x3b, 0x35, 0x74, 0x00, 0x41, 0x19, 0xac, 0x82, 0x50,
+	0x97, 0xea, 0x5c, 0x1f, 0x8e, 0x95, 0x38, 0x76, 0xed, 0x0b, 0x52, 0x99, 0x10, 0x7b, 0xa5, 0x0a,
+	0xfe, 0x01, 0xc6, 0x8a, 0x7f, 0x82, 0x95, 0xb1, 0x12, 0x4b, 0x27, 0x97, 0xba, 0x08, 0xa1, 0x4c,
+	0x15, 0x0b, 0x13, 0x12, 0xca, 0x9d, 0x9d, 0x38, 0x6e, 0xab, 0xf2, 0x43, 0xfa, 0x96, 0xaa, 0xf7,
+	0xfa, 0x79, 0x9f, 0xe7, 0xee, 0x79, 0xde, 0xcb, 0xc1, 0xa6, 0x3f, 0xb0, 0x75, 0xdf, 0xd4, 0x03,
+	0xff, 0x58, 0xf3, 0x03, 0x8f, 0x79, 0x48, 0xf2, 0x4d, 0xb9, 0xc3, 0xfa, 0x4e, 0x60, 0x1d, 0xf9,
+	0x24, 0x60, 0xa7, 0xba, 0xed, 0x79, 0xf6, 0x90, 0xea, 0xc4, 0x77, 0x74, 0x32, 0x1a, 0x79, 0x8c,
+	0x30, 0xc7, 0x1b, 0x85, 0x02, 0x2d, 0xb7, 0x17, 0x91, 0xb6, 0xc7, 0xcb, 0xfc, 0xbf, 0x04, 0xb1,
+	0x96, 0x45, 0x10, 0x97, 0x7c, 0xe5, 0x8c, 0x6c, 0x46, 0x86, 0x03, 0x1a, 0xe8, 0x84, 0x71, 0x48,
+	0x02, 0x54, 0x13, 0x21, 0xbe, 0x32, 0xc7, 0x5f, 0xe8, 0xcc, 0x71, 0x69, 0xc8, 0x88, 0xeb, 0x0b,
+	0x00, 0x8e, 0x25, 0x58, 0xde, 0xa7, 0xae, 0x49, 0x03, 0xb4, 0x0c, 0x25, 0xc7, 0x6a, 0x81, 0x36,
+	0xe8, 0x14, 0x7b, 0xe5, 0x38, 0x52, 0xa5, 0x0f, 0xf7, 0x0c, 0xc9, 0xb1, 0xd0, 0x9b, 0xb0, 0x34,
+	0x22, 0x2e, 0x6d, 0x49, 0x6d, 0xd0, 0xa9, 0xf6, 0x9a, 0x71, 0xa4, 0x96, 0x3e, 0x21, 0x2e, 0x9d,
+	0x44, 0x2a, 0xaf, 0x1b, 0xfc, 0x2f, 0xfa, 0x1c, 0x56, 0x4c, 0x27, 0x60, 0x7d, 0x8b, 0x9c, 0xb6,
+	0x8a, 0x6d, 0xd0, 0xa9, 0x75, 0x65, 0x4d, 0x88, 0x6b, 0xa9, 0xb8, 0x76, 0x90, 0x8a, 0xf7, 0xda,
+	0x71, 0xa4, 0x56, 0x7a, 0x09, 0x7e, 0x12, 0xa9, 0xb3, 0xde, 0xf3, 0x6b, 0x15, 0x7c, 0x7f, 0xad,
+	0x02, 0x63, 0x56, 0x41, 0x47, 0x10, 0x1e, 0x07, 0x94, 0x30, 0x6a, 0x1d, 0x11, 0xd6, 0x2a, 0x3d,
+	0xc9, 0xfd, 0x46, 0x1c, 0xa9, 0xd5, 0xf7, 0x45, 0xc7, 0x2e, 0x9b, 0x44, 0x6a, 0xa6, 0x7d, 0x46,
+	0x9f, 0xa9, 0x4d, 0x05, 0xc6, 0xbe, 0x95, 0x0a, 0xbc, 0xf4, 0xcf, 0x04, 0x3e, 0x15, 0x1d, 0x42,
+	0x60, 0xde, 0x3e, 0x17, 0x98, 0xd7, 0x70, 0x0d, 0x56, 0x3f, 0xa0, 0x64, 0xc8, 0xfa, 0x06, 0x3d,
+	0xc1, 0x2b, 0xf3, 0x45, 0x88, 0x9e, 0x41, 0xc9, 0x1b, 0x70, 0xcf, 0x2b, 0x86, 0xe4, 0x0d, 0xf0,
+	0x8f, 0x00, 0x36, 0xc4, 0xd6, 0x45, 0x28, 0x06, 0x3d, 0x41, 0x3b, 0x89, 0xff, 0x80, 0xfb, 0xbf,
+	0x96, 0xf7, 0xff, 0x8f, 0x48, 0x7d, 0xfe, 0x25, 0x19, 0x3a, 0x53, 0xb5, 0x6d, 0x1c, 0xd0, 0x93,
+	0xb1, 0x13, 0x50, 0x0b, 0x27, 0xb1, 0x78, 0x99, 0x58, 0xa4, 0x27, 0x4f, 0xb6, 0xf5, 0x58, 0x2c,
+	0x8f, 0x88, 0xdc, 0x4f, 0x0b, 0x7f, 0x94, 0x3f, 0x40, 0x88, 0x34, 0x58, 0x76, 0xf9, 0x82, 0x1f,
+	0xa1, 0xd6, 0x85, 0x9a, 0x6f, 0x6a, 0xe2, 0x73, 0x0f, 0xc6, 0x91, 0x9a, 0x0c, 0xa0, 0x91, 0xa0,
+	0xb6, 0x2b, 0x3f, 0xfc, 0x75, 0xb6, 0x5a, 0xec, 0x6e, 0x6c, 0xe2, 0xdf, 0x00, 0x6c, 0x08, 0xa3,
+	0xe7, 0x76, 0xbc, 0x35, 0x1b, 0xd3, 0x6a, 0xef, 0x15, 0x31, 0xa6, 0x93, 0x48, 0x95, 0x1c, 0xeb,
+	0xdb, 0x3f, 0xcf, 0x56, 0x4b, 0x2c, 0x18, 0x53, 0x3e, 0xb5, 0x3b, 0x0b, 0x53, 0xfb, 0x3f, 0x5c,
+	0x2b, 0xbe, 0x20, 0xd7, 0x16, 0xcf, 0xf9, 0xdf, 0x5d, 0xdb, 0xc0, 0x4d, 0xf8, 0xec, 0x63, 0x27,
+	0x64, 0xe2, 0x7b, 0x38, 0x9d, 0xb9, 0xfd, 0x5c, 0x25, 0x44, 0x9b, 0x70, 0x49, 0xf4, 0x85, 0x2d,
+	0xd0, 0x2e, 0xe6, 0xe8, 0x6b, 0x71, 0xa4, 0x2e, 0xa5, 0xe0, 0x14, 0x97, 0x11, 0x78, 0x0f, 0x36,
+	0xf6, 0xe8, 0x90, 0xfe, 0xfb, 0x54, 0xf0, 0x4a, 0xbe, 0x73, 0x4e, 0xfb, 0x6e, 0xf7, 0xa2, 0x08,
+	0x1b, 0xbb, 0xc9, 0x26, 0xf7, 0xc9, 0x88, 0xd8, 0x34, 0x40, 0x5b, 0xb0, 0x2c, 0x6e, 0x0b, 0x7a,
+	0x79, 0xba, 0xc1, 0xd9, 0x35, 0x92, 0x17, 0x96, 0x21, 0x6e, 0x7c, 0xf3, 0xf3, 0xaf, 0xdf, 0x49,
+	0x55, 0xb4, 0xa4, 0xf7, 0x05, 0xfc, 0x33, 0x58, 0xcf, 0xce, 0x21, 0x7a, 0x3e, 0xc5, 0xe7, 0xae,
+	0x96, 0xfc, 0x40, 0x31, 0xc4, 0xaf, 0x71, 0xaa, 0x65, 0x5c, 0xe7, 0x3f, 0xcf, 0xe9, 0xe9, 0x13,
+	0x9b, 0xd1, 0x21, 0xac, 0x67, 0x93, 0x12, 0xbc, 0xb9, 0x19, 0x95, 0x1f, 0x28, 0x86, 0xb8, 0xcd,
+	0x79, 0x65, 0xb9, 0x99, 0xe5, 0xd5, 0xb7, 0x1d, 0x6b, 0xc6, 0x7d, 0x00, 0x6b, 0x99, 0x98, 0x10,
+	0x9a, 0xb2, 0x2c, 0x26, 0x29, 0xdf, 0xaf, 0x85, 0xf8, 0x75, 0x4e, 0xfc, 0x2a, 0x5a, 0xdc, 0x70,
+	0x9a, 0x1b, 0x32, 0x60, 0x3d, 0xeb, 0xb9, 0xd8, 0x71, 0x2e, 0x3f, 0xf9, 0x81, 0x62, 0x88, 0x5b,
+	0x9c, 0x18, 0xbd, 0x7d, 0x6f, 0xc7, 0x3d, 0xfb, 0xf2, 0x46, 0x29, 0x5c, 0xdd, 0x28, 0x85, 0xbb,
+	0x1b, 0x05, 0x7c, 0x1d, 0x2b, 0xe0, 0x22, 0x56, 0xc0, 0x4f, 0xb1, 0x02, 0x2e, 0x63, 0x05, 0xfc,
+	0x12, 0x2b, 0xe0, 0xf7, 0x58, 0x29, 0xdc, 0xc5, 0x0a, 0x38, 0xbf, 0x55, 0x0a, 0x97, 0xb7, 0x4a,
+	0xe1, 0xea, 0x56, 0x29, 0x1c, 0x6e, 0xda, 0x0e, 0xeb, 0x8f, 0x4d, 0xed, 0xd8, 0x73, 0xf5, 0x5d,
+	0xf1, 0x6a, 0x1d, 0xa4, 0xaf, 0xd6, 0xba, 0xa0, 0x5f, 0x77, 0x45, 0xf0, 0xba, 0x78, 0x43, 0xcd,
+	0x32, 0xbf, 0x6f, 0xef, 0xfc, 0x1d, 0x00, 0x00, 0xff, 0xff, 0x55, 0xa0, 0xf7, 0xbf, 0x54, 0x07,
+	0x00, 0x00,
 }
 
-func (this *Record) Equal(that interface{}) bool {
+func (this *Member) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*Record)
+	that1, ok := that.(*Member)
 	if !ok {
-		that2, ok := that.(Record)
+		that2, ok := that.(Member)
 		if ok {
 			that1 = &that2
 		} else {
@@ -661,10 +634,14 @@ func (this *Record) Equal(that interface{}) bool {
 	if this.ID != that1.ID {
 		return false
 	}
-	if this.TheNum != that1.TheNum {
+	if this.Name != that1.Name {
 		return false
 	}
-	if this.TheStr != that1.TheStr {
+	if that1.Birthday == nil {
+		if this.Birthday != nil {
+			return false
+		}
+	} else if !this.Birthday.Equal(*that1.Birthday) {
 		return false
 	}
 	if that1.CreatedAt == nil {
@@ -728,14 +705,127 @@ func (this *HealthRes) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *ConfigReq) Equal(that interface{}) bool {
+func (this *CreateMemberReq) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*ConfigReq)
+	that1, ok := that.(*CreateMemberReq)
 	if !ok {
-		that2, ok := that.(ConfigReq)
+		that2, ok := that.(CreateMemberReq)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Name != that1.Name {
+		return false
+	}
+	if that1.Birthday == nil {
+		if this.Birthday != nil {
+			return false
+		}
+	} else if !this.Birthday.Equal(*that1.Birthday) {
+		return false
+	}
+	return true
+}
+func (this *CreateMemberRes) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*CreateMemberRes)
+	if !ok {
+		that2, ok := that.(CreateMemberRes)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Member.Equal(that1.Member) {
+		return false
+	}
+	return true
+}
+func (this *UpdateMemberReq) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*UpdateMemberReq)
+	if !ok {
+		that2, ok := that.(UpdateMemberReq)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.ID != that1.ID {
+		return false
+	}
+	if this.Name != that1.Name {
+		return false
+	}
+	if that1.Birthday == nil {
+		if this.Birthday != nil {
+			return false
+		}
+	} else if !this.Birthday.Equal(*that1.Birthday) {
+		return false
+	}
+	return true
+}
+func (this *UpdateMemberRes) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*UpdateMemberRes)
+	if !ok {
+		that2, ok := that.(UpdateMemberRes)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Member.Equal(that1.Member) {
+		return false
+	}
+	return true
+}
+func (this *ListMembersReq) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ListMembersReq)
+	if !ok {
+		that2, ok := that.(ListMembersReq)
 		if ok {
 			that1 = &that2
 		} else {
@@ -749,14 +839,14 @@ func (this *ConfigReq) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *ConfigRes) Equal(that interface{}) bool {
+func (this *ListMembersRes) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*ConfigRes)
+	that1, ok := that.(*ListMembersRes)
 	if !ok {
-		that2, ok := that.(ConfigRes)
+		that2, ok := that.(ListMembersRes)
 		if ok {
 			that1 = &that2
 		} else {
@@ -768,83 +858,24 @@ func (this *ConfigRes) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if this.Enable != that1.Enable {
+	if len(this.Members) != len(that1.Members) {
 		return false
 	}
-	if this.Num != that1.Num {
-		return false
-	}
-	if this.Str != that1.Str {
-		return false
+	for i := range this.Members {
+		if !this.Members[i].Equal(that1.Members[i]) {
+			return false
+		}
 	}
 	return true
 }
-func (this *CreateRecordReq) Equal(that interface{}) bool {
+func (this *DeleteMemberReq) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*CreateRecordReq)
+	that1, ok := that.(*DeleteMemberReq)
 	if !ok {
-		that2, ok := that.(CreateRecordReq)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if this.TheNum != that1.TheNum {
-		return false
-	}
-	if this.TheStr != that1.TheStr {
-		return false
-	}
-	if that1.CreatedAt == nil {
-		if this.CreatedAt != nil {
-			return false
-		}
-	} else if !this.CreatedAt.Equal(*that1.CreatedAt) {
-		return false
-	}
-	return true
-}
-func (this *CreateRecordRes) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*CreateRecordRes)
-	if !ok {
-		that2, ok := that.(CreateRecordRes)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.Record.Equal(that1.Record) {
-		return false
-	}
-	return true
-}
-func (this *GetRecordReq) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*GetRecordReq)
-	if !ok {
-		that2, ok := that.(GetRecordReq)
+		that2, ok := that.(DeleteMemberReq)
 		if ok {
 			that1 = &that2
 		} else {
@@ -861,14 +892,14 @@ func (this *GetRecordReq) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *GetRecordRes) Equal(that interface{}) bool {
+func (this *DeleteMemberRes) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*GetRecordRes)
+	that1, ok := that.(*DeleteMemberRes)
 	if !ok {
-		that2, ok := that.(GetRecordRes)
+		that2, ok := that.(DeleteMemberRes)
 		if ok {
 			that1 = &that2
 		} else {
@@ -880,76 +911,17 @@ func (this *GetRecordRes) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if !this.Record.Equal(that1.Record) {
-		return false
-	}
 	return true
 }
-func (this *ListRecordReq) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*ListRecordReq)
-	if !ok {
-		that2, ok := that.(ListRecordReq)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if this.PageSize != that1.PageSize {
-		return false
-	}
-	if this.Page != that1.Page {
-		return false
-	}
-	return true
-}
-func (this *ListRecordRes) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*ListRecordRes)
-	if !ok {
-		that2, ok := that.(ListRecordRes)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if len(this.Records) != len(that1.Records) {
-		return false
-	}
-	for i := range this.Records {
-		if !this.Records[i].Equal(that1.Records[i]) {
-			return false
-		}
-	}
-	return true
-}
-func (this *Record) GoString() string {
+func (this *Member) GoString() string {
 	if this == nil {
 		return "nil"
 	}
 	s := make([]string, 0, 9)
-	s = append(s, "&pb.Record{")
+	s = append(s, "&pb.Member{")
 	s = append(s, "ID: "+fmt.Sprintf("%#v", this.ID)+",\n")
-	s = append(s, "TheNum: "+fmt.Sprintf("%#v", this.TheNum)+",\n")
-	s = append(s, "TheStr: "+fmt.Sprintf("%#v", this.TheStr)+",\n")
+	s = append(s, "Name: "+fmt.Sprintf("%#v", this.Name)+",\n")
+	s = append(s, "Birthday: "+fmt.Sprintf("%#v", this.Birthday)+",\n")
 	s = append(s, "CreatedAt: "+fmt.Sprintf("%#v", this.CreatedAt)+",\n")
 	s = append(s, "UpdatedAt: "+fmt.Sprintf("%#v", this.UpdatedAt)+",\n")
 	s = append(s, "}")
@@ -974,93 +946,90 @@ func (this *HealthRes) GoString() string {
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
-func (this *ConfigReq) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 4)
-	s = append(s, "&pb.ConfigReq{")
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *ConfigRes) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 7)
-	s = append(s, "&pb.ConfigRes{")
-	s = append(s, "Enable: "+fmt.Sprintf("%#v", this.Enable)+",\n")
-	s = append(s, "Num: "+fmt.Sprintf("%#v", this.Num)+",\n")
-	s = append(s, "Str: "+fmt.Sprintf("%#v", this.Str)+",\n")
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *CreateRecordReq) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 7)
-	s = append(s, "&pb.CreateRecordReq{")
-	s = append(s, "TheNum: "+fmt.Sprintf("%#v", this.TheNum)+",\n")
-	s = append(s, "TheStr: "+fmt.Sprintf("%#v", this.TheStr)+",\n")
-	s = append(s, "CreatedAt: "+fmt.Sprintf("%#v", this.CreatedAt)+",\n")
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *CreateRecordRes) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 5)
-	s = append(s, "&pb.CreateRecordRes{")
-	if this.Record != nil {
-		s = append(s, "Record: "+fmt.Sprintf("%#v", this.Record)+",\n")
-	}
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *GetRecordReq) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 5)
-	s = append(s, "&pb.GetRecordReq{")
-	s = append(s, "ID: "+fmt.Sprintf("%#v", this.ID)+",\n")
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *GetRecordRes) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 5)
-	s = append(s, "&pb.GetRecordRes{")
-	if this.Record != nil {
-		s = append(s, "Record: "+fmt.Sprintf("%#v", this.Record)+",\n")
-	}
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *ListRecordReq) GoString() string {
+func (this *CreateMemberReq) GoString() string {
 	if this == nil {
 		return "nil"
 	}
 	s := make([]string, 0, 6)
-	s = append(s, "&pb.ListRecordReq{")
-	s = append(s, "PageSize: "+fmt.Sprintf("%#v", this.PageSize)+",\n")
-	s = append(s, "Page: "+fmt.Sprintf("%#v", this.Page)+",\n")
+	s = append(s, "&pb.CreateMemberReq{")
+	s = append(s, "Name: "+fmt.Sprintf("%#v", this.Name)+",\n")
+	s = append(s, "Birthday: "+fmt.Sprintf("%#v", this.Birthday)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
-func (this *ListRecordRes) GoString() string {
+func (this *CreateMemberRes) GoString() string {
 	if this == nil {
 		return "nil"
 	}
 	s := make([]string, 0, 5)
-	s = append(s, "&pb.ListRecordRes{")
-	if this.Records != nil {
-		s = append(s, "Records: "+fmt.Sprintf("%#v", this.Records)+",\n")
+	s = append(s, "&pb.CreateMemberRes{")
+	if this.Member != nil {
+		s = append(s, "Member: "+fmt.Sprintf("%#v", this.Member)+",\n")
 	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *UpdateMemberReq) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 7)
+	s = append(s, "&pb.UpdateMemberReq{")
+	s = append(s, "ID: "+fmt.Sprintf("%#v", this.ID)+",\n")
+	s = append(s, "Name: "+fmt.Sprintf("%#v", this.Name)+",\n")
+	s = append(s, "Birthday: "+fmt.Sprintf("%#v", this.Birthday)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *UpdateMemberRes) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&pb.UpdateMemberRes{")
+	if this.Member != nil {
+		s = append(s, "Member: "+fmt.Sprintf("%#v", this.Member)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ListMembersReq) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 4)
+	s = append(s, "&pb.ListMembersReq{")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ListMembersRes) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&pb.ListMembersRes{")
+	if this.Members != nil {
+		s = append(s, "Members: "+fmt.Sprintf("%#v", this.Members)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *DeleteMemberReq) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&pb.DeleteMemberReq{")
+	s = append(s, "ID: "+fmt.Sprintf("%#v", this.ID)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *DeleteMemberRes) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 4)
+	s = append(s, "&pb.DeleteMemberRes{")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -1081,225 +1050,225 @@ var _ grpc.ClientConn
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion4
 
-// GoAmazingClient is the client API for GoAmazing service.
+// AtMemberManagerClient is the client API for AtMemberManager service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
-type GoAmazingClient interface {
+type AtMemberManagerClient interface {
 	// Health check api for k8s.
 	Health(ctx context.Context, in *HealthReq, opts ...grpc.CallOption) (*HealthRes, error)
-	Config(ctx context.Context, in *ConfigReq, opts ...grpc.CallOption) (*ConfigRes, error)
-	CreateRecord(ctx context.Context, in *CreateRecordReq, opts ...grpc.CallOption) (*CreateRecordRes, error)
-	GetRecord(ctx context.Context, in *GetRecordReq, opts ...grpc.CallOption) (*GetRecordRes, error)
-	ListRecord(ctx context.Context, in *ListRecordReq, opts ...grpc.CallOption) (*ListRecordRes, error)
+	CreateMember(ctx context.Context, in *CreateMemberReq, opts ...grpc.CallOption) (*CreateMemberRes, error)
+	UpdateMember(ctx context.Context, in *UpdateMemberReq, opts ...grpc.CallOption) (*UpdateMemberRes, error)
+	ListMembers(ctx context.Context, in *ListMembersReq, opts ...grpc.CallOption) (*ListMembersRes, error)
+	DeleteMember(ctx context.Context, in *DeleteMemberReq, opts ...grpc.CallOption) (*DeleteMemberRes, error)
 }
 
-type goAmazingClient struct {
+type atMemberManagerClient struct {
 	cc *grpc.ClientConn
 }
 
-func NewGoAmazingClient(cc *grpc.ClientConn) GoAmazingClient {
-	return &goAmazingClient{cc}
+func NewAtMemberManagerClient(cc *grpc.ClientConn) AtMemberManagerClient {
+	return &atMemberManagerClient{cc}
 }
 
-func (c *goAmazingClient) Health(ctx context.Context, in *HealthReq, opts ...grpc.CallOption) (*HealthRes, error) {
+func (c *atMemberManagerClient) Health(ctx context.Context, in *HealthReq, opts ...grpc.CallOption) (*HealthRes, error) {
 	out := new(HealthRes)
-	err := c.cc.Invoke(ctx, "/pb.GoAmazing/Health", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/pb.AtMemberManager/Health", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *goAmazingClient) Config(ctx context.Context, in *ConfigReq, opts ...grpc.CallOption) (*ConfigRes, error) {
-	out := new(ConfigRes)
-	err := c.cc.Invoke(ctx, "/pb.GoAmazing/Config", in, out, opts...)
+func (c *atMemberManagerClient) CreateMember(ctx context.Context, in *CreateMemberReq, opts ...grpc.CallOption) (*CreateMemberRes, error) {
+	out := new(CreateMemberRes)
+	err := c.cc.Invoke(ctx, "/pb.AtMemberManager/CreateMember", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *goAmazingClient) CreateRecord(ctx context.Context, in *CreateRecordReq, opts ...grpc.CallOption) (*CreateRecordRes, error) {
-	out := new(CreateRecordRes)
-	err := c.cc.Invoke(ctx, "/pb.GoAmazing/CreateRecord", in, out, opts...)
+func (c *atMemberManagerClient) UpdateMember(ctx context.Context, in *UpdateMemberReq, opts ...grpc.CallOption) (*UpdateMemberRes, error) {
+	out := new(UpdateMemberRes)
+	err := c.cc.Invoke(ctx, "/pb.AtMemberManager/UpdateMember", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *goAmazingClient) GetRecord(ctx context.Context, in *GetRecordReq, opts ...grpc.CallOption) (*GetRecordRes, error) {
-	out := new(GetRecordRes)
-	err := c.cc.Invoke(ctx, "/pb.GoAmazing/GetRecord", in, out, opts...)
+func (c *atMemberManagerClient) ListMembers(ctx context.Context, in *ListMembersReq, opts ...grpc.CallOption) (*ListMembersRes, error) {
+	out := new(ListMembersRes)
+	err := c.cc.Invoke(ctx, "/pb.AtMemberManager/ListMembers", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *goAmazingClient) ListRecord(ctx context.Context, in *ListRecordReq, opts ...grpc.CallOption) (*ListRecordRes, error) {
-	out := new(ListRecordRes)
-	err := c.cc.Invoke(ctx, "/pb.GoAmazing/ListRecord", in, out, opts...)
+func (c *atMemberManagerClient) DeleteMember(ctx context.Context, in *DeleteMemberReq, opts ...grpc.CallOption) (*DeleteMemberRes, error) {
+	out := new(DeleteMemberRes)
+	err := c.cc.Invoke(ctx, "/pb.AtMemberManager/DeleteMember", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// GoAmazingServer is the server API for GoAmazing service.
-type GoAmazingServer interface {
+// AtMemberManagerServer is the server API for AtMemberManager service.
+type AtMemberManagerServer interface {
 	// Health check api for k8s.
 	Health(context.Context, *HealthReq) (*HealthRes, error)
-	Config(context.Context, *ConfigReq) (*ConfigRes, error)
-	CreateRecord(context.Context, *CreateRecordReq) (*CreateRecordRes, error)
-	GetRecord(context.Context, *GetRecordReq) (*GetRecordRes, error)
-	ListRecord(context.Context, *ListRecordReq) (*ListRecordRes, error)
+	CreateMember(context.Context, *CreateMemberReq) (*CreateMemberRes, error)
+	UpdateMember(context.Context, *UpdateMemberReq) (*UpdateMemberRes, error)
+	ListMembers(context.Context, *ListMembersReq) (*ListMembersRes, error)
+	DeleteMember(context.Context, *DeleteMemberReq) (*DeleteMemberRes, error)
 }
 
-// UnimplementedGoAmazingServer can be embedded to have forward compatible implementations.
-type UnimplementedGoAmazingServer struct {
+// UnimplementedAtMemberManagerServer can be embedded to have forward compatible implementations.
+type UnimplementedAtMemberManagerServer struct {
 }
 
-func (*UnimplementedGoAmazingServer) Health(ctx context.Context, req *HealthReq) (*HealthRes, error) {
+func (*UnimplementedAtMemberManagerServer) Health(ctx context.Context, req *HealthReq) (*HealthRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Health not implemented")
 }
-func (*UnimplementedGoAmazingServer) Config(ctx context.Context, req *ConfigReq) (*ConfigRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Config not implemented")
+func (*UnimplementedAtMemberManagerServer) CreateMember(ctx context.Context, req *CreateMemberReq) (*CreateMemberRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateMember not implemented")
 }
-func (*UnimplementedGoAmazingServer) CreateRecord(ctx context.Context, req *CreateRecordReq) (*CreateRecordRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateRecord not implemented")
+func (*UnimplementedAtMemberManagerServer) UpdateMember(ctx context.Context, req *UpdateMemberReq) (*UpdateMemberRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateMember not implemented")
 }
-func (*UnimplementedGoAmazingServer) GetRecord(ctx context.Context, req *GetRecordReq) (*GetRecordRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetRecord not implemented")
+func (*UnimplementedAtMemberManagerServer) ListMembers(ctx context.Context, req *ListMembersReq) (*ListMembersRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListMembers not implemented")
 }
-func (*UnimplementedGoAmazingServer) ListRecord(ctx context.Context, req *ListRecordReq) (*ListRecordRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListRecord not implemented")
-}
-
-func RegisterGoAmazingServer(s *grpc.Server, srv GoAmazingServer) {
-	s.RegisterService(&_GoAmazing_serviceDesc, srv)
+func (*UnimplementedAtMemberManagerServer) DeleteMember(ctx context.Context, req *DeleteMemberReq) (*DeleteMemberRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteMember not implemented")
 }
 
-func _GoAmazing_Health_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func RegisterAtMemberManagerServer(s *grpc.Server, srv AtMemberManagerServer) {
+	s.RegisterService(&_AtMemberManager_serviceDesc, srv)
+}
+
+func _AtMemberManager_Health_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(HealthReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GoAmazingServer).Health(ctx, in)
+		return srv.(AtMemberManagerServer).Health(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/pb.GoAmazing/Health",
+		FullMethod: "/pb.AtMemberManager/Health",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GoAmazingServer).Health(ctx, req.(*HealthReq))
+		return srv.(AtMemberManagerServer).Health(ctx, req.(*HealthReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _GoAmazing_Config_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ConfigReq)
+func _AtMemberManager_CreateMember_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateMemberReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GoAmazingServer).Config(ctx, in)
+		return srv.(AtMemberManagerServer).CreateMember(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/pb.GoAmazing/Config",
+		FullMethod: "/pb.AtMemberManager/CreateMember",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GoAmazingServer).Config(ctx, req.(*ConfigReq))
+		return srv.(AtMemberManagerServer).CreateMember(ctx, req.(*CreateMemberReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _GoAmazing_CreateRecord_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateRecordReq)
+func _AtMemberManager_UpdateMember_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateMemberReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GoAmazingServer).CreateRecord(ctx, in)
+		return srv.(AtMemberManagerServer).UpdateMember(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/pb.GoAmazing/CreateRecord",
+		FullMethod: "/pb.AtMemberManager/UpdateMember",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GoAmazingServer).CreateRecord(ctx, req.(*CreateRecordReq))
+		return srv.(AtMemberManagerServer).UpdateMember(ctx, req.(*UpdateMemberReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _GoAmazing_GetRecord_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetRecordReq)
+func _AtMemberManager_ListMembers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListMembersReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GoAmazingServer).GetRecord(ctx, in)
+		return srv.(AtMemberManagerServer).ListMembers(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/pb.GoAmazing/GetRecord",
+		FullMethod: "/pb.AtMemberManager/ListMembers",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GoAmazingServer).GetRecord(ctx, req.(*GetRecordReq))
+		return srv.(AtMemberManagerServer).ListMembers(ctx, req.(*ListMembersReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _GoAmazing_ListRecord_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListRecordReq)
+func _AtMemberManager_DeleteMember_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteMemberReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GoAmazingServer).ListRecord(ctx, in)
+		return srv.(AtMemberManagerServer).DeleteMember(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/pb.GoAmazing/ListRecord",
+		FullMethod: "/pb.AtMemberManager/DeleteMember",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GoAmazingServer).ListRecord(ctx, req.(*ListRecordReq))
+		return srv.(AtMemberManagerServer).DeleteMember(ctx, req.(*DeleteMemberReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-var _GoAmazing_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "pb.GoAmazing",
-	HandlerType: (*GoAmazingServer)(nil),
+var _AtMemberManager_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "pb.AtMemberManager",
+	HandlerType: (*AtMemberManagerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "Health",
-			Handler:    _GoAmazing_Health_Handler,
+			Handler:    _AtMemberManager_Health_Handler,
 		},
 		{
-			MethodName: "Config",
-			Handler:    _GoAmazing_Config_Handler,
+			MethodName: "CreateMember",
+			Handler:    _AtMemberManager_CreateMember_Handler,
 		},
 		{
-			MethodName: "CreateRecord",
-			Handler:    _GoAmazing_CreateRecord_Handler,
+			MethodName: "UpdateMember",
+			Handler:    _AtMemberManager_UpdateMember_Handler,
 		},
 		{
-			MethodName: "GetRecord",
-			Handler:    _GoAmazing_GetRecord_Handler,
+			MethodName: "ListMembers",
+			Handler:    _AtMemberManager_ListMembers_Handler,
 		},
 		{
-			MethodName: "ListRecord",
-			Handler:    _GoAmazing_ListRecord_Handler,
+			MethodName: "DeleteMember",
+			Handler:    _AtMemberManager_DeleteMember_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "pkg/pb/rpc.proto",
 }
 
-func (m *Record) Marshal() (dAtA []byte, err error) {
+func (m *Member) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -1309,12 +1278,12 @@ func (m *Record) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *Record) MarshalTo(dAtA []byte) (int, error) {
+func (m *Member) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *Record) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *Member) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -1339,24 +1308,27 @@ func (m *Record) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x22
 	}
-	if len(m.TheStr) > 0 {
-		i -= len(m.TheStr)
-		copy(dAtA[i:], m.TheStr)
-		i = encodeVarintRpc(dAtA, i, uint64(len(m.TheStr)))
+	if m.Birthday != nil {
+		n3, err3 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.Birthday, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(*m.Birthday):])
+		if err3 != nil {
+			return 0, err3
+		}
+		i -= n3
+		i = encodeVarintRpc(dAtA, i, uint64(n3))
 		i--
 		dAtA[i] = 0x1a
 	}
-	if m.TheNum != 0 {
-		i = encodeVarintRpc(dAtA, i, uint64(m.TheNum))
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintRpc(dAtA, i, uint64(len(m.Name)))
 		i--
-		dAtA[i] = 0x10
+		dAtA[i] = 0x12
 	}
-	if len(m.ID) > 0 {
-		i -= len(m.ID)
-		copy(dAtA[i:], m.ID)
-		i = encodeVarintRpc(dAtA, i, uint64(len(m.ID)))
+	if m.ID != 0 {
+		i = encodeVarintRpc(dAtA, i, uint64(m.ID))
 		i--
-		dAtA[i] = 0xa
+		dAtA[i] = 0x8
 	}
 	return len(dAtA) - i, nil
 }
@@ -1417,7 +1389,7 @@ func (m *HealthRes) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *ConfigReq) Marshal() (dAtA []byte, err error) {
+func (m *CreateMemberReq) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -1427,110 +1399,37 @@ func (m *ConfigReq) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *ConfigReq) MarshalTo(dAtA []byte) (int, error) {
+func (m *CreateMemberReq) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *ConfigReq) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *CreateMemberReq) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	return len(dAtA) - i, nil
-}
-
-func (m *ConfigRes) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *ConfigRes) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *ConfigRes) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Str) > 0 {
-		i -= len(m.Str)
-		copy(dAtA[i:], m.Str)
-		i = encodeVarintRpc(dAtA, i, uint64(len(m.Str)))
-		i--
-		dAtA[i] = 0x1a
-	}
-	if m.Num != 0 {
-		i = encodeVarintRpc(dAtA, i, uint64(m.Num))
-		i--
-		dAtA[i] = 0x10
-	}
-	if m.Enable {
-		i--
-		if m.Enable {
-			dAtA[i] = 1
-		} else {
-			dAtA[i] = 0
+	if m.Birthday != nil {
+		n4, err4 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.Birthday, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(*m.Birthday):])
+		if err4 != nil {
+			return 0, err4
 		}
-		i--
-		dAtA[i] = 0x8
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *CreateRecordReq) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *CreateRecordReq) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *CreateRecordReq) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.CreatedAt != nil {
-		n3, err3 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.CreatedAt, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(*m.CreatedAt):])
-		if err3 != nil {
-			return 0, err3
-		}
-		i -= n3
-		i = encodeVarintRpc(dAtA, i, uint64(n3))
-		i--
-		dAtA[i] = 0x1a
-	}
-	if len(m.TheStr) > 0 {
-		i -= len(m.TheStr)
-		copy(dAtA[i:], m.TheStr)
-		i = encodeVarintRpc(dAtA, i, uint64(len(m.TheStr)))
+		i -= n4
+		i = encodeVarintRpc(dAtA, i, uint64(n4))
 		i--
 		dAtA[i] = 0x12
 	}
-	if m.TheNum != 0 {
-		i = encodeVarintRpc(dAtA, i, uint64(m.TheNum))
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintRpc(dAtA, i, uint64(len(m.Name)))
 		i--
-		dAtA[i] = 0x8
+		dAtA[i] = 0xa
 	}
 	return len(dAtA) - i, nil
 }
 
-func (m *CreateRecordRes) Marshal() (dAtA []byte, err error) {
+func (m *CreateMemberRes) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -1540,19 +1439,19 @@ func (m *CreateRecordRes) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *CreateRecordRes) MarshalTo(dAtA []byte) (int, error) {
+func (m *CreateMemberRes) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *CreateRecordRes) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *CreateMemberRes) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if m.Record != nil {
+	if m.Member != nil {
 		{
-			size, err := m.Record.MarshalToSizedBuffer(dAtA[:i])
+			size, err := m.Member.MarshalToSizedBuffer(dAtA[:i])
 			if err != nil {
 				return 0, err
 			}
@@ -1565,7 +1464,7 @@ func (m *CreateRecordRes) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *GetRecordReq) Marshal() (dAtA []byte, err error) {
+func (m *UpdateMemberReq) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -1575,12 +1474,154 @@ func (m *GetRecordReq) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *GetRecordReq) MarshalTo(dAtA []byte) (int, error) {
+func (m *UpdateMemberReq) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *GetRecordReq) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *UpdateMemberReq) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Birthday != nil {
+		n6, err6 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.Birthday, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(*m.Birthday):])
+		if err6 != nil {
+			return 0, err6
+		}
+		i -= n6
+		i = encodeVarintRpc(dAtA, i, uint64(n6))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintRpc(dAtA, i, uint64(len(m.Name)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.ID) > 0 {
+		i -= len(m.ID)
+		copy(dAtA[i:], m.ID)
+		i = encodeVarintRpc(dAtA, i, uint64(len(m.ID)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *UpdateMemberRes) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *UpdateMemberRes) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *UpdateMemberRes) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Member != nil {
+		{
+			size, err := m.Member.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintRpc(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ListMembersReq) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ListMembersReq) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ListMembersReq) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *ListMembersRes) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ListMembersRes) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ListMembersRes) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Members) > 0 {
+		for iNdEx := len(m.Members) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Members[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintRpc(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *DeleteMemberReq) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *DeleteMemberReq) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *DeleteMemberReq) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -1595,7 +1636,7 @@ func (m *GetRecordReq) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *GetRecordRes) Marshal() (dAtA []byte, err error) {
+func (m *DeleteMemberRes) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -1605,102 +1646,16 @@ func (m *GetRecordRes) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *GetRecordRes) MarshalTo(dAtA []byte) (int, error) {
+func (m *DeleteMemberRes) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *GetRecordRes) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *DeleteMemberRes) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if m.Record != nil {
-		{
-			size, err := m.Record.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintRpc(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *ListRecordReq) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *ListRecordReq) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *ListRecordReq) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Page) > 0 {
-		i -= len(m.Page)
-		copy(dAtA[i:], m.Page)
-		i = encodeVarintRpc(dAtA, i, uint64(len(m.Page)))
-		i--
-		dAtA[i] = 0x12
-	}
-	if len(m.PageSize) > 0 {
-		i -= len(m.PageSize)
-		copy(dAtA[i:], m.PageSize)
-		i = encodeVarintRpc(dAtA, i, uint64(len(m.PageSize)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *ListRecordRes) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *ListRecordRes) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *ListRecordRes) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Records) > 0 {
-		for iNdEx := len(m.Records) - 1; iNdEx >= 0; iNdEx-- {
-			{
-				size, err := m.Records[iNdEx].MarshalToSizedBuffer(dAtA[:i])
-				if err != nil {
-					return 0, err
-				}
-				i -= size
-				i = encodeVarintRpc(dAtA, i, uint64(size))
-			}
-			i--
-			dAtA[i] = 0xa
-		}
-	}
 	return len(dAtA) - i, nil
 }
 
@@ -1715,21 +1670,21 @@ func encodeVarintRpc(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return base
 }
-func (m *Record) Size() (n int) {
+func (m *Member) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	l = len(m.ID)
+	if m.ID != 0 {
+		n += 1 + sovRpc(uint64(m.ID))
+	}
+	l = len(m.Name)
 	if l > 0 {
 		n += 1 + l + sovRpc(uint64(l))
 	}
-	if m.TheNum != 0 {
-		n += 1 + sovRpc(uint64(m.TheNum))
-	}
-	l = len(m.TheStr)
-	if l > 0 {
+	if m.Birthday != nil {
+		l = github_com_gogo_protobuf_types.SizeOfStdTime(*m.Birthday)
 		n += 1 + l + sovRpc(uint64(l))
 	}
 	if m.CreatedAt != nil {
@@ -1764,68 +1719,95 @@ func (m *HealthRes) Size() (n int) {
 	return n
 }
 
-func (m *ConfigReq) Size() (n int) {
+func (m *CreateMemberReq) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	return n
-}
-
-func (m *ConfigRes) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Enable {
-		n += 2
-	}
-	if m.Num != 0 {
-		n += 1 + sovRpc(uint64(m.Num))
-	}
-	l = len(m.Str)
+	l = len(m.Name)
 	if l > 0 {
 		n += 1 + l + sovRpc(uint64(l))
 	}
+	if m.Birthday != nil {
+		l = github_com_gogo_protobuf_types.SizeOfStdTime(*m.Birthday)
+		n += 1 + l + sovRpc(uint64(l))
+	}
 	return n
 }
 
-func (m *CreateRecordReq) Size() (n int) {
+func (m *CreateMemberRes) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	if m.TheNum != 0 {
-		n += 1 + sovRpc(uint64(m.TheNum))
+	if m.Member != nil {
+		l = m.Member.Size()
+		n += 1 + l + sovRpc(uint64(l))
 	}
-	l = len(m.TheStr)
+	return n
+}
+
+func (m *UpdateMemberReq) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.ID)
 	if l > 0 {
 		n += 1 + l + sovRpc(uint64(l))
 	}
-	if m.CreatedAt != nil {
-		l = github_com_gogo_protobuf_types.SizeOfStdTime(*m.CreatedAt)
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + sovRpc(uint64(l))
+	}
+	if m.Birthday != nil {
+		l = github_com_gogo_protobuf_types.SizeOfStdTime(*m.Birthday)
 		n += 1 + l + sovRpc(uint64(l))
 	}
 	return n
 }
 
-func (m *CreateRecordRes) Size() (n int) {
+func (m *UpdateMemberRes) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	if m.Record != nil {
-		l = m.Record.Size()
+	if m.Member != nil {
+		l = m.Member.Size()
 		n += 1 + l + sovRpc(uint64(l))
 	}
 	return n
 }
 
-func (m *GetRecordReq) Size() (n int) {
+func (m *ListMembersReq) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *ListMembersRes) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Members) > 0 {
+		for _, e := range m.Members {
+			l = e.Size()
+			n += 1 + l + sovRpc(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *DeleteMemberReq) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1838,48 +1820,12 @@ func (m *GetRecordReq) Size() (n int) {
 	return n
 }
 
-func (m *GetRecordRes) Size() (n int) {
+func (m *DeleteMemberRes) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	if m.Record != nil {
-		l = m.Record.Size()
-		n += 1 + l + sovRpc(uint64(l))
-	}
-	return n
-}
-
-func (m *ListRecordReq) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.PageSize)
-	if l > 0 {
-		n += 1 + l + sovRpc(uint64(l))
-	}
-	l = len(m.Page)
-	if l > 0 {
-		n += 1 + l + sovRpc(uint64(l))
-	}
-	return n
-}
-
-func (m *ListRecordRes) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if len(m.Records) > 0 {
-		for _, e := range m.Records {
-			l = e.Size()
-			n += 1 + l + sovRpc(uint64(l))
-		}
-	}
 	return n
 }
 
@@ -1889,14 +1835,14 @@ func sovRpc(x uint64) (n int) {
 func sozRpc(x uint64) (n int) {
 	return sovRpc(uint64((x << 1) ^ uint64((int64(x) >> 63))))
 }
-func (this *Record) String() string {
+func (this *Member) String() string {
 	if this == nil {
 		return "nil"
 	}
-	s := strings.Join([]string{`&Record{`,
+	s := strings.Join([]string{`&Member{`,
 		`ID:` + fmt.Sprintf("%v", this.ID) + `,`,
-		`TheNum:` + fmt.Sprintf("%v", this.TheNum) + `,`,
-		`TheStr:` + fmt.Sprintf("%v", this.TheStr) + `,`,
+		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
+		`Birthday:` + strings.Replace(fmt.Sprintf("%v", this.Birthday), "Timestamp", "types.Timestamp", 1) + `,`,
 		`CreatedAt:` + strings.Replace(fmt.Sprintf("%v", this.CreatedAt), "Timestamp", "types.Timestamp", 1) + `,`,
 		`UpdatedAt:` + strings.Replace(fmt.Sprintf("%v", this.UpdatedAt), "Timestamp", "types.Timestamp", 1) + `,`,
 		`}`,
@@ -1922,91 +1868,88 @@ func (this *HealthRes) String() string {
 	}, "")
 	return s
 }
-func (this *ConfigReq) String() string {
+func (this *CreateMemberReq) String() string {
 	if this == nil {
 		return "nil"
 	}
-	s := strings.Join([]string{`&ConfigReq{`,
+	s := strings.Join([]string{`&CreateMemberReq{`,
+		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
+		`Birthday:` + strings.Replace(fmt.Sprintf("%v", this.Birthday), "Timestamp", "types.Timestamp", 1) + `,`,
 		`}`,
 	}, "")
 	return s
 }
-func (this *ConfigRes) String() string {
+func (this *CreateMemberRes) String() string {
 	if this == nil {
 		return "nil"
 	}
-	s := strings.Join([]string{`&ConfigRes{`,
-		`Enable:` + fmt.Sprintf("%v", this.Enable) + `,`,
-		`Num:` + fmt.Sprintf("%v", this.Num) + `,`,
-		`Str:` + fmt.Sprintf("%v", this.Str) + `,`,
+	s := strings.Join([]string{`&CreateMemberRes{`,
+		`Member:` + strings.Replace(this.Member.String(), "Member", "Member", 1) + `,`,
 		`}`,
 	}, "")
 	return s
 }
-func (this *CreateRecordReq) String() string {
+func (this *UpdateMemberReq) String() string {
 	if this == nil {
 		return "nil"
 	}
-	s := strings.Join([]string{`&CreateRecordReq{`,
-		`TheNum:` + fmt.Sprintf("%v", this.TheNum) + `,`,
-		`TheStr:` + fmt.Sprintf("%v", this.TheStr) + `,`,
-		`CreatedAt:` + strings.Replace(fmt.Sprintf("%v", this.CreatedAt), "Timestamp", "types.Timestamp", 1) + `,`,
+	s := strings.Join([]string{`&UpdateMemberReq{`,
+		`ID:` + fmt.Sprintf("%v", this.ID) + `,`,
+		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
+		`Birthday:` + strings.Replace(fmt.Sprintf("%v", this.Birthday), "Timestamp", "types.Timestamp", 1) + `,`,
 		`}`,
 	}, "")
 	return s
 }
-func (this *CreateRecordRes) String() string {
+func (this *UpdateMemberRes) String() string {
 	if this == nil {
 		return "nil"
 	}
-	s := strings.Join([]string{`&CreateRecordRes{`,
-		`Record:` + strings.Replace(this.Record.String(), "Record", "Record", 1) + `,`,
+	s := strings.Join([]string{`&UpdateMemberRes{`,
+		`Member:` + strings.Replace(this.Member.String(), "Member", "Member", 1) + `,`,
 		`}`,
 	}, "")
 	return s
 }
-func (this *GetRecordReq) String() string {
+func (this *ListMembersReq) String() string {
 	if this == nil {
 		return "nil"
 	}
-	s := strings.Join([]string{`&GetRecordReq{`,
+	s := strings.Join([]string{`&ListMembersReq{`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ListMembersRes) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForMembers := "[]*Member{"
+	for _, f := range this.Members {
+		repeatedStringForMembers += strings.Replace(f.String(), "Member", "Member", 1) + ","
+	}
+	repeatedStringForMembers += "}"
+	s := strings.Join([]string{`&ListMembersRes{`,
+		`Members:` + repeatedStringForMembers + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *DeleteMemberReq) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&DeleteMemberReq{`,
 		`ID:` + fmt.Sprintf("%v", this.ID) + `,`,
 		`}`,
 	}, "")
 	return s
 }
-func (this *GetRecordRes) String() string {
+func (this *DeleteMemberRes) String() string {
 	if this == nil {
 		return "nil"
 	}
-	s := strings.Join([]string{`&GetRecordRes{`,
-		`Record:` + strings.Replace(this.Record.String(), "Record", "Record", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *ListRecordReq) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&ListRecordReq{`,
-		`PageSize:` + fmt.Sprintf("%v", this.PageSize) + `,`,
-		`Page:` + fmt.Sprintf("%v", this.Page) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *ListRecordRes) String() string {
-	if this == nil {
-		return "nil"
-	}
-	repeatedStringForRecords := "[]*Record{"
-	for _, f := range this.Records {
-		repeatedStringForRecords += strings.Replace(f.String(), "Record", "Record", 1) + ","
-	}
-	repeatedStringForRecords += "}"
-	s := strings.Join([]string{`&ListRecordRes{`,
-		`Records:` + repeatedStringForRecords + `,`,
+	s := strings.Join([]string{`&DeleteMemberRes{`,
 		`}`,
 	}, "")
 	return s
@@ -2019,7 +1962,7 @@ func valueToStringRpc(v interface{}) string {
 	pv := reflect.Indirect(rv).Interface()
 	return fmt.Sprintf("*%v", pv)
 }
-func (m *Record) Unmarshal(dAtA []byte) error {
+func (m *Member) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -2042,16 +1985,35 @@ func (m *Record) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: Record: wiretype end group for non-group")
+			return fmt.Errorf("proto: Member: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: Record: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: Member: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
-			if wireType != 2 {
+			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field ID", wireType)
 			}
+			m.ID = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRpc
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.ID |= int64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
@@ -2078,32 +2040,13 @@ func (m *Record) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.ID = string(dAtA[iNdEx:postIndex])
+			m.Name = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 2:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field TheNum", wireType)
-			}
-			m.TheNum = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRpc
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.TheNum |= int64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
 		case 3:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field TheStr", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Birthday", wireType)
 			}
-			var stringLen uint64
+			var msglen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowRpc
@@ -2113,23 +2056,27 @@ func (m *Record) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
+			if msglen < 0 {
 				return ErrInvalidLengthRpc
 			}
-			postIndex := iNdEx + intStringLen
+			postIndex := iNdEx + msglen
 			if postIndex < 0 {
 				return ErrInvalidLengthRpc
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.TheStr = string(dAtA[iNdEx:postIndex])
+			if m.Birthday == nil {
+				m.Birthday = new(time.Time)
+			}
+			if err := github_com_gogo_protobuf_types.StdTimeUnmarshal(m.Birthday, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
 			iNdEx = postIndex
 		case 4:
 			if wireType != 2 {
@@ -2344,7 +2291,7 @@ func (m *HealthRes) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *ConfigReq) Unmarshal(dAtA []byte) error {
+func (m *CreateMemberReq) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -2367,104 +2314,15 @@ func (m *ConfigReq) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: ConfigReq: wiretype end group for non-group")
+			return fmt.Errorf("proto: CreateMemberReq: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: ConfigReq: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		default:
-			iNdEx = preIndex
-			skippy, err := skipRpc(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthRpc
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *ConfigRes) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowRpc
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: ConfigRes: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: ConfigRes: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: CreateMemberReq: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Enable", wireType)
-			}
-			var v int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRpc
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				v |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			m.Enable = bool(v != 0)
-		case 2:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Num", wireType)
-			}
-			m.Num = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRpc
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Num |= int64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 3:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Str", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -2492,7 +2350,43 @@ func (m *ConfigRes) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Str = string(dAtA[iNdEx:postIndex])
+			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Birthday", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRpc
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRpc
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRpc
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Birthday == nil {
+				m.Birthday = new(time.Time)
+			}
+			if err := github_com_gogo_protobuf_types.StdTimeUnmarshal(m.Birthday, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -2515,7 +2409,7 @@ func (m *ConfigRes) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *CreateRecordReq) Unmarshal(dAtA []byte) error {
+func (m *CreateMemberRes) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -2538,17 +2432,17 @@ func (m *CreateRecordReq) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: CreateRecordReq: wiretype end group for non-group")
+			return fmt.Errorf("proto: CreateMemberRes: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: CreateRecordReq: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: CreateMemberRes: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field TheNum", wireType)
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Member", wireType)
 			}
-			m.TheNum = 0
+			var msglen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowRpc
@@ -2558,14 +2452,81 @@ func (m *CreateRecordReq) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.TheNum |= int64(b&0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-		case 2:
+			if msglen < 0 {
+				return ErrInvalidLengthRpc
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRpc
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Member == nil {
+				m.Member = &Member{}
+			}
+			if err := m.Member.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRpc(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthRpc
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *UpdateMemberReq) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRpc
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: UpdateMemberReq: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: UpdateMemberReq: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field TheStr", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field ID", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -2593,11 +2554,43 @@ func (m *CreateRecordReq) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.TheStr = string(dAtA[iNdEx:postIndex])
+			m.ID = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRpc
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRpc
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthRpc
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 3:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field CreatedAt", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Birthday", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -2624,10 +2617,10 @@ func (m *CreateRecordReq) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.CreatedAt == nil {
-				m.CreatedAt = new(time.Time)
+			if m.Birthday == nil {
+				m.Birthday = new(time.Time)
 			}
-			if err := github_com_gogo_protobuf_types.StdTimeUnmarshal(m.CreatedAt, dAtA[iNdEx:postIndex]); err != nil {
+			if err := github_com_gogo_protobuf_types.StdTimeUnmarshal(m.Birthday, dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -2652,7 +2645,7 @@ func (m *CreateRecordReq) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *CreateRecordRes) Unmarshal(dAtA []byte) error {
+func (m *UpdateMemberRes) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -2675,15 +2668,15 @@ func (m *CreateRecordRes) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: CreateRecordRes: wiretype end group for non-group")
+			return fmt.Errorf("proto: UpdateMemberRes: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: CreateRecordRes: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: UpdateMemberRes: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Record", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Member", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -2710,10 +2703,10 @@ func (m *CreateRecordRes) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.Record == nil {
-				m.Record = &Record{}
+			if m.Member == nil {
+				m.Member = &Member{}
 			}
-			if err := m.Record.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.Member.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -2738,7 +2731,7 @@ func (m *CreateRecordRes) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *GetRecordReq) Unmarshal(dAtA []byte) error {
+func (m *ListMembersReq) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -2761,10 +2754,144 @@ func (m *GetRecordReq) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: GetRecordReq: wiretype end group for non-group")
+			return fmt.Errorf("proto: ListMembersReq: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: GetRecordReq: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: ListMembersReq: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRpc(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthRpc
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ListMembersRes) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRpc
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ListMembersRes: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ListMembersRes: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Members", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRpc
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRpc
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthRpc
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Members = append(m.Members, &Member{})
+			if err := m.Members[len(m.Members)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRpc(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthRpc
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *DeleteMemberReq) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRpc
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: DeleteMemberReq: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: DeleteMemberReq: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -2820,7 +2947,7 @@ func (m *GetRecordReq) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *GetRecordRes) Unmarshal(dAtA []byte) error {
+func (m *DeleteMemberRes) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -2843,246 +2970,12 @@ func (m *GetRecordRes) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: GetRecordRes: wiretype end group for non-group")
+			return fmt.Errorf("proto: DeleteMemberRes: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: GetRecordRes: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: DeleteMemberRes: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Record", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRpc
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthRpc
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthRpc
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.Record == nil {
-				m.Record = &Record{}
-			}
-			if err := m.Record.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipRpc(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthRpc
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *ListRecordReq) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowRpc
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: ListRecordReq: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: ListRecordReq: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field PageSize", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRpc
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthRpc
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthRpc
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.PageSize = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Page", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRpc
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthRpc
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthRpc
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Page = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipRpc(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthRpc
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *ListRecordRes) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowRpc
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: ListRecordRes: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: ListRecordRes: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Records", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRpc
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthRpc
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthRpc
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Records = append(m.Records, &Record{})
-			if err := m.Records[len(m.Records)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipRpc(dAtA[iNdEx:])

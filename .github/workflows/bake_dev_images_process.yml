@@ -43,7 +43,7 @@ jobs:
           aws_ecr_registry_url: "769647069563.dkr.ecr.ap-northeast-1.amazonaws.com"
           aws_region: "ap-northeast-1"
           env: "staging-${{ github.ref_name }}"
-          image_names: "go-amazing-rpc,go-amazing-cron"
+          image_names: "at-member-manager-rpc,at-member-manager-cron"
           gh_access_token: ${{ secrets.GH_IT_TOKEN_GOLANG_CI }}
           commit_id: ${{ github.sha }}
           slack_bot_user_oauth_access_token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
@@ -64,7 +64,7 @@ jobs:
         with:
           runner_env: "mgmt-v2"
           env: "staging-${{ github.ref_name }}"
-          services: "go-amazing-rpc,go-amazing-cron"
+          services: "at-member-manager-rpc,at-member-manager-cron"
           image_tag: ${{ needs.run_test_and_push_image.outputs.image_tag }}
           committer: ${{ github.actor }}
           enable_synchook: "false"
@@ -75,7 +75,7 @@ jobs:
         uses: ./.github/actions/sync_up_argocd
         with:
           env: "staging-${{ github.ref_name }}"
-          services: "go-amazing-rpc,go-amazing-cron"
+          services: "at-member-manager-rpc,at-member-manager-cron"
           image_tag: ${{ needs.run_test_and_push_image.outputs.image_tag }}
           committer: ${{ github.actor }}
           argocd_admin_password: ${{ secrets.ARGOCD_ADMIN_PASSWD }}
@@ -105,7 +105,7 @@ jobs:
         with:
           env: staging-${{ github.ref_name }}
           update_target: "main"
-          service: "go-amazing-rpc"
+          service: "at-member-manager-rpc"
           image_tag: ${{ needs.run_test_and_push_image.outputs.image_tag }}
           committer: ${{ github.actor }}
           enable_synchook: false
@@ -119,7 +119,7 @@ jobs:
         with:
           env: staging-${{ github.ref_name }}
           update_target: "main"
-          service: "go-amazing-cron"
+          service: "at-member-manager-cron"
           image_tag: ${{ needs.run_test_and_push_image.outputs.image_tag }}
           committer: ${{ github.actor }}
           enable_synchook: false

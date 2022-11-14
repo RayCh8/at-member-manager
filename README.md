@@ -1,4 +1,4 @@
-# go-amazing
+# at-member-manager
 
 Go-Amazing is a Golang service template for Amazing Talker. The template bases on [Google/Protobuf](https://developers.google.com/protocol-buffers), it combine our custom generator [AmazingTalker/protoc-gen-svc](https://github.com/AmazingTalker/protoc-gen-svc/) and decoupled Golang utilities [AmazingTalker/go-rpc-kit](https://github.com/AmazingTalker/go-rpc-kit).
 
@@ -97,7 +97,7 @@ If you do not want to install scripts or compilers on your device, we provided a
 
 ### Run the demo services
 
-It is recommanded to run the demo services if you use the go-amazing template at the first time.
+It is recommanded to run the demo services if you use the at-member-manager template at the first time.
 
 See [this guide](https://www.notion.so/amazingtalker/Start-the-Demo-Services-07377f0d2f0942acae5cbea70a617e52) to start the demo services.
 

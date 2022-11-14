@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-const GoAmazingGrpcContextKey = "grpc-client-GoAmazing"
+const AtMemberManagerGrpcContextKey = "grpc-client-AtMemberManager"
 
 type deferFunc func()
 
@@ -20,29 +20,57 @@ func ContextWithGrpcClient(ctx context.Context, addr string) (context.Context, d
 	if err != nil {
 		return nil, nil, err
 	}
-	client := NewGoAmazingClient(conn)
+	client := NewAtMemberManagerClient(conn)
 	handleDeferFunc := func() {
 		conn.Close()
 	}
-	return context.WithValue(ctx, GoAmazingGrpcContextKey, &client), handleDeferFunc, nil
+	return context.WithValue(ctx, AtMemberManagerGrpcContextKey, &client), handleDeferFunc, nil
 }
 
-func RefiningGoAmazingGrpcClientFromContext(ctx context.Context) (*GoAmazingClient, error) {
-	client, ok := ctx.Value(GoAmazingGrpcContextKey).(*GoAmazingClient)
+func RefiningAtMemberManagerGrpcClientFromContext(ctx context.Context) (*AtMemberManagerClient, error) {
+	client, ok := ctx.Value(AtMemberManagerGrpcContextKey).(*AtMemberManagerClient)
 	if !ok {
-		return nil, errors.New("RefiningGoAmazingGrpcClientFromContext failed")
+		return nil, errors.New("RefiningAtMemberManagerGrpcClientFromContext failed")
 	}
 	return client, nil
 }
 
-var RecordObject = graphql.NewObject(graphql.ObjectConfig{
-	Name: "RecordObject",
+var UpdateMemberResObject = graphql.NewObject(graphql.ObjectConfig{
+	Name: "UpdateMemberResObject",
 	Fields: graphql.Fields{
-		"id":         &graphql.Field{Type: graphql.String},
-		"the_num":    &graphql.Field{Type: graphql.Int},
-		"the_str":    &graphql.Field{Type: graphql.String},
-		"created_at": &graphql.Field{Type: graphql.String},
-		"updated_at": &graphql.Field{Type: graphql.String},
+		"member": &graphql.Field{Type: MemberObject},
+	},
+	Description: "",
+})
+
+var DeleteMemberReqObject = graphql.NewObject(graphql.ObjectConfig{
+	Name: "DeleteMemberReqObject",
+	Fields: graphql.Fields{
+		"id": &graphql.Field{Type: graphql.String},
+	},
+	Description: "",
+})
+
+var DeleteMemberResObject = graphql.NewObject(graphql.ObjectConfig{
+	Name:        "DeleteMemberResObject",
+	Fields:      graphql.Fields{},
+	Description: "",
+})
+
+var CreateMemberResObject = graphql.NewObject(graphql.ObjectConfig{
+	Name: "CreateMemberResObject",
+	Fields: graphql.Fields{
+		"member": &graphql.Field{Type: MemberObject},
+	},
+	Description: "",
+})
+
+var UpdateMemberReqObject = graphql.NewObject(graphql.ObjectConfig{
+	Name: "UpdateMemberReqObject",
+	Fields: graphql.Fields{
+		"id":       &graphql.Field{Type: graphql.String},
+		"name":     &graphql.Field{Type: graphql.String},
+		"birthday": &graphql.Field{Type: graphql.String},
 	},
 	Description: "",
 })
@@ -55,25 +83,37 @@ var HealthResObject = graphql.NewObject(graphql.ObjectConfig{
 	Description: "",
 })
 
-var ConfigReqObject = graphql.NewObject(graphql.ObjectConfig{
-	Name:        "ConfigReqObject",
-	Fields:      graphql.Fields{},
-	Description: "",
-})
-
-var GetRecordResObject = graphql.NewObject(graphql.ObjectConfig{
-	Name: "GetRecordResObject",
+var CreateMemberReqObject = graphql.NewObject(graphql.ObjectConfig{
+	Name: "CreateMemberReqObject",
 	Fields: graphql.Fields{
-		"record": &graphql.Field{Type: RecordObject},
+		"name":     &graphql.Field{Type: graphql.String},
+		"birthday": &graphql.Field{Type: graphql.String},
 	},
 	Description: "",
 })
 
-var ListRecordReqObject = graphql.NewObject(graphql.ObjectConfig{
-	Name: "ListRecordReqObject",
+var ListMembersReqObject = graphql.NewObject(graphql.ObjectConfig{
+	Name:        "ListMembersReqObject",
+	Fields:      graphql.Fields{},
+	Description: "",
+})
+
+var ListMembersResObject = graphql.NewObject(graphql.ObjectConfig{
+	Name: "ListMembersResObject",
 	Fields: graphql.Fields{
-		"size": &graphql.Field{Type: graphql.String},
-		"page": &graphql.Field{Type: graphql.String},
+		"members": &graphql.Field{Type: graphql.NewList(MemberObject)},
+	},
+	Description: "",
+})
+
+var MemberObject = graphql.NewObject(graphql.ObjectConfig{
+	Name: "MemberObject",
+	Fields: graphql.Fields{
+		"id":         &graphql.Field{Type: graphql.Int},
+		"name":       &graphql.Field{Type: graphql.String},
+		"birthday":   &graphql.Field{Type: graphql.String},
+		"created_at": &graphql.Field{Type: graphql.String},
+		"updated_at": &graphql.Field{Type: graphql.String},
 	},
 	Description: "",
 })
@@ -81,50 +121,6 @@ var ListRecordReqObject = graphql.NewObject(graphql.ObjectConfig{
 var HealthReqObject = graphql.NewObject(graphql.ObjectConfig{
 	Name:        "HealthReqObject",
 	Fields:      graphql.Fields{},
-	Description: "",
-})
-
-var ConfigResObject = graphql.NewObject(graphql.ObjectConfig{
-	Name: "ConfigResObject",
-	Fields: graphql.Fields{
-		"enable": &graphql.Field{Type: graphql.Boolean},
-		"num":    &graphql.Field{Type: graphql.Int},
-		"str":    &graphql.Field{Type: graphql.String},
-	},
-	Description: "",
-})
-
-var CreateRecordReqObject = graphql.NewObject(graphql.ObjectConfig{
-	Name: "CreateRecordReqObject",
-	Fields: graphql.Fields{
-		"the_num":    &graphql.Field{Type: graphql.Int},
-		"the_str":    &graphql.Field{Type: graphql.String},
-		"created_at": &graphql.Field{Type: graphql.String},
-	},
-	Description: "",
-})
-
-var CreateRecordResObject = graphql.NewObject(graphql.ObjectConfig{
-	Name: "CreateRecordResObject",
-	Fields: graphql.Fields{
-		"record": &graphql.Field{Type: RecordObject},
-	},
-	Description: "",
-})
-
-var GetRecordReqObject = graphql.NewObject(graphql.ObjectConfig{
-	Name: "GetRecordReqObject",
-	Fields: graphql.Fields{
-		"id": &graphql.Field{Type: graphql.String},
-	},
-	Description: "",
-})
-
-var ListRecordResObject = graphql.NewObject(graphql.ObjectConfig{
-	Name: "ListRecordResObject",
-	Fields: graphql.Fields{
-		"records": &graphql.Field{Type: graphql.NewList(RecordObject)},
-	},
 	Description: "",
 })
 
@@ -138,7 +134,7 @@ var HealthQueryType = graphql.NewObject(graphql.ObjectConfig{
 	Description: "",
 })
 
-func GoAmazingHealthResolver(p graphql.ResolveParams) (interface{}, error) {
+func AtMemberManagerHealthResolver(p graphql.ResolveParams) (interface{}, error) {
 	type result struct {
 		data interface{}
 		err  error
@@ -147,7 +143,7 @@ func GoAmazingHealthResolver(p graphql.ResolveParams) (interface{}, error) {
 	go func() {
 		defer close(ch)
 
-		client, err := RefiningGoAmazingGrpcClientFromContext(p.Context)
+		client, err := RefiningAtMemberManagerGrpcClientFromContext(p.Context)
 		if err != nil {
 			ch <- result{data: nil, err: err}
 			return
@@ -176,19 +172,20 @@ func GoAmazingHealthResolver(p graphql.ResolveParams) (interface{}, error) {
 	}, nil
 }
 
-var ConfigArguments = graphql.FieldConfigArgument{}
+var CreateMemberArguments = graphql.FieldConfigArgument{
+	"name":     &graphql.ArgumentConfig{Type: graphql.String},
+	"birthday": &graphql.ArgumentConfig{Type: graphql.String},
+}
 
-var ConfigQueryType = graphql.NewObject(graphql.ObjectConfig{
-	Name: "ConfigQueryType",
+var CreateMemberQueryType = graphql.NewObject(graphql.ObjectConfig{
+	Name: "CreateMemberQueryType",
 	Fields: graphql.Fields{
-		"enable": &graphql.Field{Type: graphql.Boolean},
-		"num":    &graphql.Field{Type: graphql.Int},
-		"str":    &graphql.Field{Type: graphql.String},
+		"member": &graphql.Field{Type: MemberObject},
 	},
 	Description: "",
 })
 
-func GoAmazingConfigResolver(p graphql.ResolveParams) (interface{}, error) {
+func AtMemberManagerCreateMemberResolver(p graphql.ResolveParams) (interface{}, error) {
 	type result struct {
 		data interface{}
 		err  error
@@ -197,14 +194,14 @@ func GoAmazingConfigResolver(p graphql.ResolveParams) (interface{}, error) {
 	go func() {
 		defer close(ch)
 
-		client, err := RefiningGoAmazingGrpcClientFromContext(p.Context)
+		client, err := RefiningAtMemberManagerGrpcClientFromContext(p.Context)
 		if err != nil {
 			ch <- result{data: nil, err: err}
 			return
 		}
 
 		ctx, _ := context.WithTimeout(context.Background(), time.Second*30)
-		req := ConfigReq{}
+		req := CreateMemberReq{}
 		if len(p.Args) != 0 {
 			err = ms.Decode(p.Args, &req)
 			if err != nil {
@@ -213,7 +210,7 @@ func GoAmazingConfigResolver(p graphql.ResolveParams) (interface{}, error) {
 			}
 		}
 
-		res, err := (*client).Config(ctx, &req)
+		res, err := (*client).CreateMember(ctx, &req)
 		if err != nil {
 			ch <- result{data: nil, err: err}
 			return
@@ -226,21 +223,21 @@ func GoAmazingConfigResolver(p graphql.ResolveParams) (interface{}, error) {
 	}, nil
 }
 
-var CreateRecordArguments = graphql.FieldConfigArgument{
-	"the_num":    &graphql.ArgumentConfig{Type: graphql.Int},
-	"the_str":    &graphql.ArgumentConfig{Type: graphql.String},
-	"created_at": &graphql.ArgumentConfig{Type: graphql.String},
+var UpdateMemberArguments = graphql.FieldConfigArgument{
+	"id":       &graphql.ArgumentConfig{Type: graphql.String},
+	"name":     &graphql.ArgumentConfig{Type: graphql.String},
+	"birthday": &graphql.ArgumentConfig{Type: graphql.String},
 }
 
-var CreateRecordQueryType = graphql.NewObject(graphql.ObjectConfig{
-	Name: "CreateRecordQueryType",
+var UpdateMemberQueryType = graphql.NewObject(graphql.ObjectConfig{
+	Name: "UpdateMemberQueryType",
 	Fields: graphql.Fields{
-		"record": &graphql.Field{Type: RecordObject},
+		"member": &graphql.Field{Type: MemberObject},
 	},
 	Description: "",
 })
 
-func GoAmazingCreateRecordResolver(p graphql.ResolveParams) (interface{}, error) {
+func AtMemberManagerUpdateMemberResolver(p graphql.ResolveParams) (interface{}, error) {
 	type result struct {
 		data interface{}
 		err  error
@@ -249,14 +246,14 @@ func GoAmazingCreateRecordResolver(p graphql.ResolveParams) (interface{}, error)
 	go func() {
 		defer close(ch)
 
-		client, err := RefiningGoAmazingGrpcClientFromContext(p.Context)
+		client, err := RefiningAtMemberManagerGrpcClientFromContext(p.Context)
 		if err != nil {
 			ch <- result{data: nil, err: err}
 			return
 		}
 
 		ctx, _ := context.WithTimeout(context.Background(), time.Second*30)
-		req := CreateRecordReq{}
+		req := UpdateMemberReq{}
 		if len(p.Args) != 0 {
 			err = ms.Decode(p.Args, &req)
 			if err != nil {
@@ -265,7 +262,7 @@ func GoAmazingCreateRecordResolver(p graphql.ResolveParams) (interface{}, error)
 			}
 		}
 
-		res, err := (*client).CreateRecord(ctx, &req)
+		res, err := (*client).UpdateMember(ctx, &req)
 		if err != nil {
 			ch <- result{data: nil, err: err}
 			return
@@ -278,19 +275,65 @@ func GoAmazingCreateRecordResolver(p graphql.ResolveParams) (interface{}, error)
 	}, nil
 }
 
-var GetRecordArguments = graphql.FieldConfigArgument{
+var ListMembersArguments = graphql.FieldConfigArgument{}
+
+var ListMembersQueryType = graphql.NewObject(graphql.ObjectConfig{
+	Name: "ListMembersQueryType",
+	Fields: graphql.Fields{
+		"members": &graphql.Field{Type: graphql.NewList(MemberObject)},
+	},
+	Description: "",
+})
+
+func AtMemberManagerListMembersResolver(p graphql.ResolveParams) (interface{}, error) {
+	type result struct {
+		data interface{}
+		err  error
+	}
+	ch := make(chan result, 1)
+	go func() {
+		defer close(ch)
+
+		client, err := RefiningAtMemberManagerGrpcClientFromContext(p.Context)
+		if err != nil {
+			ch <- result{data: nil, err: err}
+			return
+		}
+
+		ctx, _ := context.WithTimeout(context.Background(), time.Second*30)
+		req := ListMembersReq{}
+		if len(p.Args) != 0 {
+			err = ms.Decode(p.Args, &req)
+			if err != nil {
+				ch <- result{data: nil, err: err}
+				return
+			}
+		}
+
+		res, err := (*client).ListMembers(ctx, &req)
+		if err != nil {
+			ch <- result{data: nil, err: err}
+			return
+		}
+		ch <- result{data: res, err: nil}
+	}()
+	return func() (interface{}, error) {
+		r := <-ch
+		return r.data, r.err
+	}, nil
+}
+
+var DeleteMemberArguments = graphql.FieldConfigArgument{
 	"id": &graphql.ArgumentConfig{Type: graphql.String},
 }
 
-var GetRecordQueryType = graphql.NewObject(graphql.ObjectConfig{
-	Name: "GetRecordQueryType",
-	Fields: graphql.Fields{
-		"record": &graphql.Field{Type: RecordObject},
-	},
+var DeleteMemberQueryType = graphql.NewObject(graphql.ObjectConfig{
+	Name:        "DeleteMemberQueryType",
+	Fields:      graphql.Fields{},
 	Description: "",
 })
 
-func GoAmazingGetRecordResolver(p graphql.ResolveParams) (interface{}, error) {
+func AtMemberManagerDeleteMemberResolver(p graphql.ResolveParams) (interface{}, error) {
 	type result struct {
 		data interface{}
 		err  error
@@ -299,14 +342,14 @@ func GoAmazingGetRecordResolver(p graphql.ResolveParams) (interface{}, error) {
 	go func() {
 		defer close(ch)
 
-		client, err := RefiningGoAmazingGrpcClientFromContext(p.Context)
+		client, err := RefiningAtMemberManagerGrpcClientFromContext(p.Context)
 		if err != nil {
 			ch <- result{data: nil, err: err}
 			return
 		}
 
 		ctx, _ := context.WithTimeout(context.Background(), time.Second*30)
-		req := GetRecordReq{}
+		req := DeleteMemberReq{}
 		if len(p.Args) != 0 {
 			err = ms.Decode(p.Args, &req)
 			if err != nil {
@@ -315,7 +358,7 @@ func GoAmazingGetRecordResolver(p graphql.ResolveParams) (interface{}, error) {
 			}
 		}
 
-		res, err := (*client).GetRecord(ctx, &req)
+		res, err := (*client).DeleteMember(ctx, &req)
 		if err != nil {
 			ch <- result{data: nil, err: err}
 			return
@@ -328,90 +371,27 @@ func GoAmazingGetRecordResolver(p graphql.ResolveParams) (interface{}, error) {
 	}, nil
 }
 
-var ListRecordArguments = graphql.FieldConfigArgument{
-	"size": &graphql.ArgumentConfig{Type: graphql.String},
-	"page": &graphql.ArgumentConfig{Type: graphql.String},
-}
-
-var ListRecordQueryType = graphql.NewObject(graphql.ObjectConfig{
-	Name: "ListRecordQueryType",
-	Fields: graphql.Fields{
-		"records": &graphql.Field{Type: graphql.NewList(RecordObject)},
-	},
-	Description: "",
-})
-
-func GoAmazingListRecordResolver(p graphql.ResolveParams) (interface{}, error) {
-	type result struct {
-		data interface{}
-		err  error
-	}
-	ch := make(chan result, 1)
-	go func() {
-		defer close(ch)
-
-		client, err := RefiningGoAmazingGrpcClientFromContext(p.Context)
-		if err != nil {
-			ch <- result{data: nil, err: err}
-			return
-		}
-
-		ctx, _ := context.WithTimeout(context.Background(), time.Second*30)
-		req := ListRecordReq{}
-		if len(p.Args) != 0 {
-			err = ms.Decode(p.Args, &req)
-			if err != nil {
-				ch <- result{data: nil, err: err}
-				return
-			}
-		}
-
-		res, err := (*client).ListRecord(ctx, &req)
-		if err != nil {
-			ch <- result{data: nil, err: err}
-			return
-		}
-		ch <- result{data: res, err: nil}
-	}()
-	return func() (interface{}, error) {
-		r := <-ch
-		return r.data, r.err
-	}, nil
-}
-
-var internalGoAmazingRootQuery = graphql.NewObject(graphql.ObjectConfig{
-	Name: "GoAmazingQuery",
+var internalAtMemberManagerRootQuery = graphql.NewObject(graphql.ObjectConfig{
+	Name: "AtMemberManagerQuery",
 	Fields: graphql.Fields{
 		"Health": &graphql.Field{
 			Name:    "Health",
 			Type:    HealthQueryType,
 			Args:    HealthArguments,
-			Resolve: GoAmazingHealthResolver,
+			Resolve: AtMemberManagerHealthResolver,
 		},
-		"Config": &graphql.Field{
-			Name:    "Config",
-			Type:    ConfigQueryType,
-			Args:    ConfigArguments,
-			Resolve: GoAmazingConfigResolver,
-		},
-		"GetRecord": &graphql.Field{
-			Name:    "GetRecord",
-			Type:    GetRecordQueryType,
-			Args:    GetRecordArguments,
-			Resolve: GoAmazingGetRecordResolver,
-		},
-		"ListRecord": &graphql.Field{
-			Name:    "ListRecord",
-			Type:    ListRecordQueryType,
-			Args:    ListRecordArguments,
-			Resolve: GoAmazingListRecordResolver,
+		"ListMembers": &graphql.Field{
+			Name:    "ListMembers",
+			Type:    ListMembersQueryType,
+			Args:    ListMembersArguments,
+			Resolve: AtMemberManagerListMembersResolver,
 		},
 	},
 })
 
-var GoAmazingRootQueryField = graphql.Field{
-	Name: "GoAmazing",
-	Type: internalGoAmazingRootQuery,
+var AtMemberManagerRootQueryField = graphql.Field{
+	Name: "AtMemberManager",
+	Type: internalAtMemberManagerRootQuery,
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		return func() (interface{}, error) {
 			return p.Info, nil
@@ -419,21 +399,33 @@ var GoAmazingRootQueryField = graphql.Field{
 	},
 }
 
-var internalGoAmazingRootMutation = graphql.NewObject(graphql.ObjectConfig{
-	Name: "GoAmazingMutation",
+var internalAtMemberManagerRootMutation = graphql.NewObject(graphql.ObjectConfig{
+	Name: "AtMemberManagerMutation",
 	Fields: graphql.Fields{
-		"CreateRecord": &graphql.Field{
-			Name:    "CreateRecord",
-			Type:    CreateRecordQueryType,
-			Args:    CreateRecordArguments,
-			Resolve: GoAmazingCreateRecordResolver,
+		"CreateMember": &graphql.Field{
+			Name:    "CreateMember",
+			Type:    CreateMemberQueryType,
+			Args:    CreateMemberArguments,
+			Resolve: AtMemberManagerCreateMemberResolver,
+		},
+		"UpdateMember": &graphql.Field{
+			Name:    "UpdateMember",
+			Type:    UpdateMemberQueryType,
+			Args:    UpdateMemberArguments,
+			Resolve: AtMemberManagerUpdateMemberResolver,
+		},
+		"DeleteMember": &graphql.Field{
+			Name:    "DeleteMember",
+			Type:    DeleteMemberQueryType,
+			Args:    DeleteMemberArguments,
+			Resolve: AtMemberManagerDeleteMemberResolver,
 		},
 	},
 })
 
-var GoAmazingRootMutationField = graphql.Field{
-	Name: "GoAmazing",
-	Type: internalGoAmazingRootMutation,
+var AtMemberManagerRootMutationField = graphql.Field{
+	Name: "AtMemberManager",
+	Type: internalAtMemberManagerRootMutation,
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		return func() (interface{}, error) {
 			return p.Info, nil

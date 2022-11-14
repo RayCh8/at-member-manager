@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/AmazingTalker/go-amazing/pkg/cronjob"
+	"github.com/AmazingTalker/at-member-manager/pkg/cronjob"
 	"github.com/AmazingTalker/go-rpc-kit/envkit"
 	"github.com/AmazingTalker/go-rpc-kit/flagkit"
 	"github.com/AmazingTalker/go-rpc-kit/logkit"

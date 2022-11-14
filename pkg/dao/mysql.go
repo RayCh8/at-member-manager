@@ -2,70 +2,74 @@ package dao
 
 import (
 	"context"
+	"errors"
 
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 
 	"github.com/AmazingTalker/go-rpc-kit/daokit"
 	"github.com/AmazingTalker/go-rpc-kit/logkit"
 )
 
-type MySqlRecordDAO struct {
+type MySqlMemberDAO struct {
 	db *gorm.DB
 }
 
-func NewMySqlRecordDAO(db *gorm.DB) MySqlRecordDAO {
-	return MySqlRecordDAO{db: db}
+func NewMySqlMemberDAO(db *gorm.DB) MySqlMemberDAO {
+	return MySqlMemberDAO{db: db}
 }
 
-func (dao MySqlRecordDAO) CreateRecord(ctx context.Context, record *Record, enrich ...daokit.Enrich) error {
+func (dao MySqlMemberDAO) CreateMember(ctx context.Context, member *Member, enrich ...daokit.Enrich) (*Member, error) {
 	defer met.RecordDuration([]string{"mysql", "time"}, map[string]string{}).End()
-
-	record.ID = uuid.New()
 
 	db, _ := daokit.UseTxOrDB(dao.db, enrich...)
 
-	err := db.Create(record).Error
+	err := db.Create(member).Error
 
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return member, nil
 }
 
-func (dao MySqlRecordDAO) GetRecord(ctx context.Context, id string) (*Record, error) {
+func (dao MySqlMemberDAO) UpdateMember(ctx context.Context, id int64, m *Member) (*Member, error) {
 	defer met.RecordDuration([]string{"mysql", "time"}, map[string]string{}).End()
 
-	record := &Record{}
+	if m == nil {
+		return nil, errors.New("member pointer is nil.")
+	}
+	member := &Member{}
 
-	err := dao.db.First(record, "id = ?", id).Error
+	err := dao.db.First(member, "id = ?", id).Updates(Member{Name: m.Name, Birthday: m.Birthday}).Error
 
 	if err != nil {
-		logkit.Debug(ctx, "get record failed", logkit.Payload{"id": id, "err": err})
+		logkit.Debug(ctx, "update member failed", logkit.Payload{"id": id, "err": err})
 		return nil, err
 	}
 
-	return record, nil
+	return member, nil
 }
 
-func (dao MySqlRecordDAO) ListRecords(ctx context.Context, opt ListRecordsOpt) ([]Record, error) {
+func (dao MySqlMemberDAO) ListMembers(ctx context.Context) ([]Member, error) {
 	defer met.RecordDuration([]string{"mysql", "time"}, map[string]string{}).End()
 
 	query := dao.db
 
-	if opt.Size > 0 {
-		query = query.Limit(opt.Size)
-
-		if opt.Page > 0 {
-			query = query.Offset(opt.Page * opt.Size)
-		}
-	}
-
-	list := []Record{}
+	list := []Member{}
 	if err := query.Find(&list).Error; err != nil {
-		logkit.Debug(ctx, "list record failed", logkit.Payload{"options": opt, "err": err})
+		logkit.Debug(ctx, "list member failed", logkit.Payload{"err": err})
 		return nil, err
 	}
 
 	return list, nil
+}
+
+func (dao MySqlMemberDAO) DeleteMember(ctx context.Context, id int64) error {
+	defer met.RecordDuration([]string{"mysql", "time"}, map[string]string{}).End()
+
+	if err := dao.db.Delete(&Member{}, id).Error; err != nil {
+		logkit.Debug(ctx, "Delete member failed", logkit.Payload{"err": err})
+		return err
+	}
+
+	return nil
 }

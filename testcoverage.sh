@@ -1,5 +1,5 @@
 basicCoverageRate=700
-repositoryName="go-amazing"
+repositoryName="at-member-manager"
 coverageResult=$(go tool cover -func=coverage.out)
 
 echo "$coverageResult\n-----------------------"

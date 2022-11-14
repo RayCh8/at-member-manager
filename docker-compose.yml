@@ -3,14 +3,14 @@ version: '3.4'
 x-env-run: &env-run
   CI_BUILD: $CI_BUILD
   ENV_NAMESPACE: development # options: production, staging, development
-  ENV_PROJECT_NAME: go-amazing
-  ENV_SERVICE_NAME: go-amazing-rpc
+  ENV_PROJECT_NAME: at-member-manager
+  ENV_SERVICE_NAME: at-member-manager-rpc
   METRIC_API_KEY: <new-relic-insights-insert-key> # TODO: needs to be encrypted in the future
   METRIC_REFLESH_SECONDS: 1
   LOGGER_LEVEL: debug
   LOGGER_DEVELOPMENT: "true"
   LOGGER_AIRBRAKE_PROJECT_ID: 0
-  MYSQL_DSN: root:root@tcp(mysql:3306)/go-amazing?charset=utf8mb4&parseTime=True
+  MYSQL_DSN: root:root@tcp(mysql:3306)/at-member-manager?charset=utf8mb4&parseTime=True
   REDIS_ADDRS: server1:redis:6379 # support multiple addresses by the delimiter `,` eg: server1:redis:6379,server2:redis:6380
   LOCAL_CACHE_SIZE: 1048576 # = 1024*1024
   MONITOR_PERIOD_SECONDS: 5
@@ -108,8 +108,8 @@ services:
       - redis
       - etcd
 
-  go-amazing-rpc:
-    image: go-amazing-rpc:latest
+  at-member-manager-rpc:
+    image: at-member-manager-rpc:latest
     build:
       context: .
       target: rpc
@@ -128,8 +128,8 @@ services:
       - default
     command: ["/script/wait-for", "mysql:3306", "--timeout=15", "--", "/rpc"]
 
-  go-amazing-cron:
-    image: go-amazing-cron:latest
+  at-member-manager-cron:
+    image: at-member-manager-cron:latest
     build:
       context: .
       target: cron
@@ -137,7 +137,7 @@ services:
 
 networks:
   default:
-    name: go-amazing
+    name: at-member-manager
   proxy:
     external: true
     name: rails

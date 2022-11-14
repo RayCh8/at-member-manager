@@ -8,14 +8,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rafaelhl/gorm-newrelic-telemetry-plugin/telemetry"
-	etcd "go.etcd.io/etcd/client/v3"
 	"google.golang.org/grpc"
 
-	"github.com/AmazingTalker/go-amazing/pkg/dao"
-	"github.com/AmazingTalker/go-amazing/pkg/pb"
-	"github.com/AmazingTalker/go-amazing/pkg/rpc"
+	"github.com/AmazingTalker/at-member-manager/pkg/dao"
+	"github.com/AmazingTalker/at-member-manager/pkg/pb"
+	"github.com/AmazingTalker/at-member-manager/pkg/rpc"
 	"github.com/AmazingTalker/go-rpc-kit/cachekit"
-	"github.com/AmazingTalker/go-rpc-kit/configkit"
 	"github.com/AmazingTalker/go-rpc-kit/envkit"
 	"github.com/AmazingTalker/go-rpc-kit/flagkit"
 	"github.com/AmazingTalker/go-rpc-kit/logkit"
@@ -66,47 +64,47 @@ func main() {
 	})
 	defer logkit.Flush()
 
-	// init etcd
-	logkit.Info(ctx, "init etcd", logkit.Payload{
-		"addrs":              env.EtcdConfig.Addrs,
-		"dialTimeoutSeconds": env.EtcdConfig.DialTimeoutSeconds,
-	})
+	// // init etcd
+	// logkit.Info(ctx, "init etcd", logkit.Payload{
+	// 	"addrs":              env.EtcdConfig.Addrs,
+	// 	"dialTimeoutSeconds": env.EtcdConfig.DialTimeoutSeconds,
+	// })
 
-	etcdCli, err := etcd.New(etcd.Config{
-		Username:    env.EtcdConfig.Username,
-		Password:    env.EtcdConfig.Password,
-		Endpoints:   env.EtcdConfig.Addrs,
-		DialTimeout: time.Second * time.Duration(env.EtcdConfig.DialTimeoutSeconds),
-		DialOptions: []grpc.DialOption{grpc.WithBlock()},
-	})
-	if err != nil {
-		// Because eks-staging-v2 haven't deployed the ETCD. I ignore this Fatal, use normal Error instead.
-		logkit.ErrorV2(ctx, "init etcd failed", err, nil)
-	}
-	defer etcdCli.Close()
+	// etcdCli, err := etcd.New(etcd.Config{
+	// 	Username:    env.EtcdConfig.Username,
+	// 	Password:    env.EtcdConfig.Password,
+	// 	Endpoints:   env.EtcdConfig.Addrs,
+	// 	DialTimeout: time.Second * time.Duration(env.EtcdConfig.DialTimeoutSeconds),
+	// 	DialOptions: []grpc.DialOption{grpc.WithBlock()},
+	// })
+	// if err != nil {
+	// 	// Because eks-staging-v2 haven't deployed the ETCD. I ignore this Fatal, use normal Error instead.
+	// 	logkit.ErrorV2(ctx, "init etcd failed", err, nil)
+	// }
+	// defer etcdCli.Close()
 
-	// publishing the configs to etcd in development env
-	if envkit.Namespace() == envkit.EnvDevelopment {
-		publisher := configkit.NewPublisher(etcdCli, configRoot, configkit.RenderRoot(envkit.EnvDevelopment))
-		if err := publisher.Publish(ctx); err != nil {
-			logkit.FatalV2(ctx, "config.Publish failed", err, nil)
-		}
-	}
+	// // publishing the configs to etcd in development env
+	// if envkit.Namespace() == envkit.EnvDevelopment {
+	// 	publisher := configkit.NewPublisher(etcdCli, configRoot, configkit.RenderRoot(envkit.EnvDevelopment))
+	// 	if err := publisher.Publish(ctx); err != nil {
+	// 		logkit.FatalV2(ctx, "config.Publish failed", err, nil)
+	// 	}
+	// }
 
-	// init dynamic config watcher
-	logkit.Info(ctx, "init config watcher", logkit.Payload{
-		"projectName": envkit.ProjectName(),
-		"env":         envkit.Namespace(),
-	})
+	// // init dynamic config watcher
+	// logkit.Info(ctx, "init config watcher", logkit.Payload{
+	// 	"projectName": envkit.ProjectName(),
+	// 	"env":         envkit.Namespace(),
+	// })
 
-	if err := configkit.LaunchWatcher(ctx, configkit.Params{
-		ProjectName: envkit.ProjectName(),
-		Env:         envkit.Namespace(),
-		Client:      etcdCli,
-	}); err != nil {
-		logkit.ErrorV2(ctx, "config.LaunchWatcher failed, and stopped listening changes on remote", err, nil)
-		logkit.Errorf(ctx, "check prject name in amazing-configs, or the path parameter in configkit.Register()")
-	}
+	// if err := configkit.LaunchWatcher(ctx, configkit.Params{
+	// 	ProjectName: envkit.ProjectName(),
+	// 	Env:         envkit.Namespace(),
+	// 	Client:      etcdCli,
+	// }); err != nil {
+	// 	logkit.ErrorV2(ctx, "config.LaunchWatcher failed, and stopped listening changes on remote", err, nil)
+	// 	logkit.Errorf(ctx, "check prject name in amazing-configs, or the path parameter in configkit.Register()")
+	// }
 
 	// init metric
 	logkit.Info(ctx, "init metric", logkit.Payload{
@@ -200,9 +198,9 @@ func main() {
 
 	// init server base
 	logkit.Infof(ctx, "init server")
-	serv := rpc.NewGoAmazingServer(rpc.GoAmazingServerOpt{
+	serv := rpc.NewAtMemberManagerServer(rpc.AtMemberManagerServerOpt{
 		Validator: validator,
-		RecordDao: dao.NewRecordDAO(db, cacheSrv),
+		MemberDao: dao.NewMemberDAO(db, cacheSrv),
 	})
 
 	// init service
@@ -231,7 +229,7 @@ func main() {
 }
 
 // NewGrpcSvcLauncher 3-1. You need add a gRPC listener and register the service.
-func NewGrpcSvcLauncher(addr string, serv pb.GoAmazingServer) *ServiceLauncher {
+func NewGrpcSvcLauncher(addr string, serv pb.AtMemberManagerServer) *ServiceLauncher {
 
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -240,7 +238,7 @@ func NewGrpcSvcLauncher(addr string, serv pb.GoAmazingServer) *ServiceLauncher {
 
 	s := grpc.NewServer()
 
-	pb.RegisterGoAmazingGrpcService(s, serv) // 3-2. Run "RegisterGoAmazingGrpcService"
+	pb.RegisterAtMemberManagerGrpcService(s, serv) // 3-2. Run "RegisterAtMemberManagerGrpcService"
 
 	return &ServiceLauncher{
 		Labels: []string{"grpc"},
@@ -251,15 +249,15 @@ func NewGrpcSvcLauncher(addr string, serv pb.GoAmazingServer) *ServiceLauncher {
 }
 
 // NewHttpSvcLauncher 4-1. You need add a HTTP listener and register the service.
-func NewHttpSvcLauncher(addr string, serv pb.GoAmazingServer) *ServiceLauncher {
+func NewHttpSvcLauncher(addr string, serv pb.AtMemberManagerServer) *ServiceLauncher {
 
-	// TODO: move details into RegisterGoAmazingHttpService
+	// TODO: move details into RegisterAtMemberManagerHttpService
 
 	s := gin.New()
 	s.Use(gin.Recovery())
 	s.Use(metrickit.Middleware(metrickit.New("gin")))
 
-	pb.RegisterGoAmazingHttpService(s, serv) // 4-2. Run "RegisterGoAmazingHttpService"
+	pb.RegisterAtMemberManagerHttpService(s, serv) // 4-2. Run "RegisterAtMemberManagerHttpService"
 
 	return &ServiceLauncher{
 		Labels: []string{"http"},

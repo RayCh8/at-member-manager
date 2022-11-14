@@ -4,6 +4,6 @@ package pb
 
 import "google.golang.org/grpc"
 
-func RegisterGoAmazingGrpcService(s *grpc.Server, srv GoAmazingServer) {
-	RegisterGoAmazingServer(s, srv)
+func RegisterAtMemberManagerGrpcService(s *grpc.Server, srv AtMemberManagerServer) {
+	RegisterAtMemberManagerServer(s, srv)
 }

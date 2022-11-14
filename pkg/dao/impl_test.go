@@ -2,7 +2,6 @@ package dao
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -10,7 +9,6 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"
 	"gorm.io/gorm"
 
@@ -30,7 +28,7 @@ const (
 
 var (
 	mockCTX     = context.Background()
-	mockUUID    = uuid.New()
+	mockID      = int64(1)
 	mockTimeNow time.Time
 	mockLoc     *time.Location
 )
@@ -149,7 +147,7 @@ func (s *daoSuite) SetupTest() {
 		cachekit.NewLocalCache(1024),
 	)
 
-	s.im = NewRecordDAO(s.db, s.cache).(*impl)
+	s.im = NewMemberDAO(s.db, s.cache).(*impl)
 }
 
 func (s *daoSuite) TearDownTest() {
@@ -161,36 +159,36 @@ func (s *daoSuite) TearDownTest() {
 	}))
 
 	// clean all in mysql
-	s.Require().NoError(s.db.Where("1 = 1").Delete(&Record{}).Error)
+	s.Require().NoError(s.db.Where("id = 1").Delete(&Member{}).Error)
 }
 
 func TestDAOSuite(t *testing.T) {
 	suite.Run(t, new(daoSuite))
 }
 
-func (s *daoSuite) TestCreateRecord() {
+func (s *daoSuite) TestCreateMember() {
 	tests := []struct {
 		Desc      string
-		Record    *Record
+		Member    *Member
 		CheckFunc func(string)
 	}{
 		{
 			Desc: "normal case",
-			Record: &Record{
-				TheNum:    1,
-				TheStr:    "normal",
+			Member: &Member{
+				Name:      "ray",
+				Birthday:  &mockTimeNow,
 				CreatedAt: &mockTimeNow,
 				UpdatedAt: &mockTimeNow,
 			},
 			CheckFunc: func(desc string) {
-				records := []Record{}
-				s.Require().NoError(s.db.Find(&records).Error, desc)
-				s.Require().Equal(1, len(records), desc)
+				members := []Member{}
+				s.Require().NoError(s.db.Find(&members).Error, desc)
+				s.Require().Equal(1, len(members), desc)
 
-				record := records[0]
-				s.Require().Equal(mockTimeNow, *record.CreatedAt, desc)
-				s.Require().Equal(int64(1), record.TheNum, desc)
-				s.Require().Equal("normal", record.TheStr, desc)
+				member := members[0]
+				s.Require().Equal(mockTimeNow, *member.CreatedAt, desc)
+				s.Require().Equal(int64(1), member.ID, desc)
+				s.Require().Equal("ray", member.Name, desc)
 			},
 		},
 	}
@@ -198,7 +196,7 @@ func (s *daoSuite) TestCreateRecord() {
 	for _, t := range tests {
 		s.SetupTest()
 
-		err := s.im.CreateRecord(mockCTX, t.Record)
+		_, err := s.im.CreateMember(mockCTX, t.Member)
 		s.Require().NoError(err, t.Desc)
 
 		if t.CheckFunc != nil {
@@ -209,51 +207,49 @@ func (s *daoSuite) TestCreateRecord() {
 	}
 }
 
-func (s *daoSuite) TestGetRecord() {
+func (s *daoSuite) TestUpdateMember() {
 	tests := []struct {
 		Desc      string
 		SetupTest func(string)
-		ID        string
+		ID        int64
 		ExpErr    error
-		ExpRecord *Record
+		Name      string
+		Birthday  *time.Time
+		ExpMember *Member
 		CheckFunc func(string)
 	}{
 		{
-			Desc:   "not existed",
-			ID:     "nothing",
-			ExpErr: fmt.Errorf("record not found"),
+			Desc:     "not existed",
+			ID:       3,
+			ExpErr:   gorm.ErrRecordNotFound,
+			Name:     "ray2",
+			Birthday: &mockTimeNow,
 		},
 		{
 			Desc: "normal case",
 			SetupTest: func(desc string) {
-				rs := []Record{
-					{ID: mockUUID, CreatedAt: &mockTimeNow, UpdatedAt: &mockTimeNow, TheNum: 80, TheStr: "AT"},
+				ms := []Member{
+					{ID: mockID, CreatedAt: &mockTimeNow, UpdatedAt: &mockTimeNow, Name: "ray", Birthday: &mockTimeNow},
 				}
-				s.Require().NoError(s.db.Create(&rs).Error, desc)
+				s.Require().NoError(s.db.Create(&ms).Error, desc)
 			},
-			ID:     mockUUID.String(),
-			ExpErr: nil,
-			ExpRecord: &Record{
-				ID:        mockUUID,
-				TheNum:    int64(80),
-				TheStr:    "AT",
+			ID:       mockID,
+			ExpErr:   nil,
+			Name:     "ray2",
+			Birthday: &mockTimeNow,
+			ExpMember: &Member{
+				ID:        mockID,
+				Name:      "ray2",
+				Birthday:  &mockTimeNow,
 				CreatedAt: &mockTimeNow,
 				UpdatedAt: &mockTimeNow,
 			},
 			CheckFunc: func(desc string) {
-				// check cache
-				b, err := s.ring.Get(mockCTX, fmt.Sprintf("ca:records:%s", mockUUID.String())).Bytes()
-				s.Require().NoError(err, desc)
-
-				r := Record{}
-				s.Require().NoError(json.Unmarshal(b, &r), desc)
-				s.Require().Equal(Record{
-					ID:        mockUUID,
-					TheNum:    int64(80),
-					TheStr:    "AT",
-					CreatedAt: &mockTimeNow,
-					UpdatedAt: &mockTimeNow,
-				}, r, desc)
+				member := Member{}
+				s.Require().NoError(s.db.First(&member, mockID).Error, desc)
+				s.Require().Equal(int64(1), member.ID, desc)
+				s.Require().Equal("ray2", member.Name, desc)
+				s.Require().Equal(mockTimeNow, *member.Birthday, desc)
 			},
 		},
 	}
@@ -265,10 +261,75 @@ func (s *daoSuite) TestGetRecord() {
 			t.SetupTest(t.Desc)
 		}
 
-		record, err := s.im.GetRecord(mockCTX, t.ID)
+		m, err := s.im.UpdateMember(mockCTX, mockID, &Member{Name: t.Name, Birthday: t.Birthday})
 		s.Require().Equal(t.ExpErr, err, t.Desc)
 		if err == nil {
-			s.Require().Equal(t.ExpRecord, record, t.Desc)
+			s.Require().Equal(t.ExpMember.Name, m.Name, t.Desc)
+			s.Require().Equal(t.ExpMember.Birthday, m.Birthday, t.Desc)
+		}
+
+		s.TearDownTest()
+	}
+}
+
+func (s *daoSuite) TestListMembers() {
+	tests := []struct {
+		Desc       string
+		SetupTest  func(string)
+		ExpErr     error
+		ExpMembers []Member
+		CheckFunc  func(string)
+	}{
+		{
+			Desc:       "no members",
+			ExpErr:     nil,
+			ExpMembers: []Member{},
+		},
+		{
+			Desc: "normal case",
+			SetupTest: func(desc string) {
+				ms := []Member{
+					{ID: mockID, CreatedAt: &mockTimeNow, UpdatedAt: &mockTimeNow, Name: "AT", Birthday: &mockTimeNow},
+				}
+				s.Require().NoError(s.db.Create(&ms).Error, desc)
+			},
+			ExpErr: nil,
+			ExpMembers: []Member{
+				{
+					ID:        mockID,
+					Name:      "AT",
+					Birthday:  &mockTimeNow,
+					CreatedAt: &mockTimeNow,
+					UpdatedAt: &mockTimeNow,
+				},
+			},
+			CheckFunc: func(desc string) {
+				members := []Member{}
+				s.Require().NoError(s.db.Find(&members).Error, desc)
+				s.Require().Equal([]Member{
+					{
+						ID:        mockID,
+						Name:      "AT",
+						Birthday:  &mockTimeNow,
+						CreatedAt: &mockTimeNow,
+						UpdatedAt: &mockTimeNow,
+					},
+				}, members, desc)
+			},
+		},
+	}
+
+	for _, t := range tests {
+		s.SetupTest()
+
+		if t.SetupTest != nil {
+			t.SetupTest(t.Desc)
+		}
+
+		ms, err := s.im.ListMembers(mockCTX)
+		s.Require().Equal(t.ExpErr, err, t.Desc)
+		if err == nil {
+			s.Require().Equal(t.ExpMembers, ms, t.Desc)
 		}
 
 		if t.CheckFunc != nil {
@@ -279,54 +340,32 @@ func (s *daoSuite) TestGetRecord() {
 	}
 }
 
-func (s *daoSuite) TestListRecords() {
+func (s *daoSuite) TestDeleteMember() {
 	tests := []struct {
-		Desc       string
-		SetupTest  func(string)
-		Opt        ListRecordsOpt
-		ExpErr     error
-		ExpRecords []Record
-		CheckFunc  func(string)
+		Desc      string
+		SetupTest func(string)
+		ID        int64
+		ExpErr    error
+		CheckFunc func(string)
 	}{
 		{
-			Desc:       "no records",
-			Opt:        ListRecordsOpt{Size: 10, Page: 0},
-			ExpErr:     nil,
-			ExpRecords: []Record{},
+			Desc:   "not existed",
+			ID:     3,
+			ExpErr: nil,
 		},
 		{
 			Desc: "normal case",
 			SetupTest: func(desc string) {
-				rs := []Record{
-					{ID: mockUUID, CreatedAt: &mockTimeNow, UpdatedAt: &mockTimeNow, TheNum: 80, TheStr: "AT"},
+				ms := []Member{
+					{ID: mockID, CreatedAt: &mockTimeNow, UpdatedAt: &mockTimeNow, Name: "AT", Birthday: &mockTimeNow},
 				}
-				s.Require().NoError(s.db.Create(&rs).Error, desc)
+				s.Require().NoError(s.db.Create(&ms).Error, desc)
 			},
-			Opt:    ListRecordsOpt{Size: 10, Page: 0},
+			ID:     mockID,
 			ExpErr: nil,
-			ExpRecords: []Record{
-				{
-					ID:        mockUUID,
-					CreatedAt: &mockTimeNow,
-					UpdatedAt: &mockTimeNow,
-					TheNum:    80,
-					TheStr:    "AT",
-				},
-			},
 			CheckFunc: func(desc string) {
-				// check cache
-				b, err := s.ring.Get(mockCTX, "ca:records:0-10").Bytes()
-				s.Require().NoError(err, desc)
-
-				rs := []Record{}
-				s.Require().NoError(json.Unmarshal(b, &rs), desc)
-				s.Require().Equal([]Record{{
-					ID:        mockUUID,
-					TheNum:    int64(80),
-					TheStr:    "AT",
-					CreatedAt: &mockTimeNow,
-					UpdatedAt: &mockTimeNow,
-				}}, rs, desc)
+				member := Member{}
+				s.Require().Equal(s.db.First(&member, mockID).Error, gorm.ErrRecordNotFound, desc)
 			},
 		},
 	}
@@ -338,11 +377,8 @@ func (s *daoSuite) TestListRecords() {
 			t.SetupTest(t.Desc)
 		}
 
-		records, err := s.im.ListRecords(mockCTX, t.Opt)
+		err := s.im.DeleteMember(mockCTX, t.ID)
 		s.Require().Equal(t.ExpErr, err, t.Desc)
-		if err == nil {
-			s.Require().Equal(t.ExpRecords, records, t.Desc)
-		}
 
 		if t.CheckFunc != nil {
 			t.CheckFunc(t.Desc)
